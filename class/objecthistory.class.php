@@ -51,15 +51,13 @@ class ObjectHistory extends SeedObject
 
 	public function unserializeObject()
 	{
-		$code = gzinflate(base64_decode($this->serialized_object_source));
-		if($code === false) {
-			$code = $this->serialized_object_source;
-		}
+		$code = @gzinflate(base64_decode($this->serialized_object_source));
+		if($code === false) $code = $this->serialized_object_source;
 
-		$object_source = unserialize($code);
-		if($object_source === false) $object_source = unserialize(utf8_decode($code));
+		$code = unserialize($code);
+		if($code === false) $code = unserialize(utf8_decode($code));
 
-		return $object_source;
+		$this->serialized_object_source = $code;
 	}
 
 	public function serializeObject(&$object)

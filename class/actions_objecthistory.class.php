@@ -114,9 +114,27 @@ class ActionsObjectHistory
 				$version->unserializeObject();
 
 //				$obj = $version->serialized_object_source;
-				foreach ($object->fields as $key => &$val)
+				if (!empty($object->fields))
 				{
-					$val = $version->serialized_object_source->{$key};
+					foreach ($object->fields as $key => &$val)
+					{
+						$val = $version->serialized_object_source->{$key};
+					}
+				}
+				else
+				{
+					foreach($version->serialized_object_source as $k => $v)
+					{
+						if ($k == 'db') continue;
+						$object->{$k} = $v;
+					}
+
+					foreach($object->lines as &$line)
+					{
+						$line->description  = $line->desc;
+						$line->db = $db;
+						//$line->fetch_optionals();
+					}
 				}
 
 //				$propal = $version->getObject();
