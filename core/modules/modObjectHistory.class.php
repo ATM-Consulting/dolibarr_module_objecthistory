@@ -90,7 +90,19 @@ class modObjectHistory extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@objecthistory')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array(
+			'triggers' => 1
+			,'hooks' => array(
+				'propalcard'
+				,'ordercard'
+				,'invoicecard'
+				,'supplier_proposalcard'
+				,'ordersuppliercard'
+				,'invoicesuppliercard'
+//				,'contractcard'
+				,'pdfgeneration'
+			)
+		);
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/objecthistory/temp");
@@ -105,7 +117,7 @@ class modObjectHistory extends DolibarrModules
 		$this->requiredby = array();	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
-		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
+		$this->need_dolibarr_version = array(4.0);	// Minimum version of Dolibarr required by module
 		$this->langfiles = array("objecthistory@objecthistory");
 
 		// Constants

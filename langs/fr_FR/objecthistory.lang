@@ -14,34 +14,9 @@ ParamLabel=Nom du paramètre
 ParamDesc=Une description si besoin
 ParamHelp=Le contenu de l'aide
 
-# MENU
-TopMenuObjectHistory=ObjectHistory
-
-# STATUS
-ObjectHistoryStatusDraft=Brouillon (à valider)
-ObjectHistoryStatusValidated=Validée (à accepter)
-ObjectHistoryStatusRefused=Refusée (fermée)
-ObjectHistoryStatusAccepted=Acceptée (fermée)
-
-Draft=Brouillon
-Validate=Validé
-Refused=Refusé
-Accepted=Accepté
-
-# LIST
-ObjectHistoryList=Liste ObjectHistory
-NoObjectHistory=(vide)
-
-# CARD
-NewObjectHistory=Création ObjectHistory
-ObjectHistoryCard=Fiche ObjectHistory
-
-# CARD TPL
-Save=Enregistrer
-CreateDraft=Créer brouillon
-Cancel=Annuler
-Validate=Valider
-Modify=Modifier
-Reopen=Rouvrir
-ToClone=Cloner
-Delete=Supprimer
+OBJECTHISTORY_AUTO_ARCHIVE=Archiver automatiquement l'objet lors de sa validation
+OBJECTHISTORY_SHOW_VERSION_PDF=Afficher le numéro de version sur le PDF (à partir du 2e)
+OBJECTHISTORY_HIDE_VERSION_ON_TABS=Masquer le numéro de version dans les onglets
+OBJECTHISTORY_ARCHIVE_PDF_TOO=Archiver aussi le PDF
+OBJECTHISTORY_ARCHIVE_ON_MODIFY=Demander l'archivage à la modification de l'objet
+OBJECTHISTORY_USE_COMPRESS_ARCHIVE=Compression des données en base

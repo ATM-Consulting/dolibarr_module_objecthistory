@@ -12,11 +12,9 @@ if(!defined('INC_FROM_DOLIBARR')) {
 }
 
 
-/* uncomment
-
 
 dol_include_once('/objecthistory/class/objecthistory.class.php');
 
 $o=new ObjectHistory($db);
 $o->init_db_by_vars();
-*/
+

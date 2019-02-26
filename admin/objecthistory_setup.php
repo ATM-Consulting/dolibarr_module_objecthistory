@@ -84,7 +84,7 @@ llxHeader('', $langs->trans($page_name));
 // Subheader
 $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
     . $langs->trans("BackToModuleList") . '</a>';
-print_fiche_titre($langs->trans($page_name), $linkback);
+print load_fiche_titre($langs->trans($page_name), $linkback);
 
 // Configuration header
 $head = objecthistoryAdminPrepareHead();
@@ -110,13 +110,18 @@ if(!function_exists('setup_print_title')){
 setup_print_title("Parameters");
 
 // Example with a yes / no select
-setup_print_on_off('CONSTNAME', 'ParamLabel' , 'ParamDesc');
+setup_print_on_off('OBJECTHISTORY_AUTO_ARCHIVE');
+setup_print_on_off('OBJECTHISTORY_SHOW_VERSION_PDF');
+setup_print_on_off('OBJECTHISTORY_HIDE_VERSION_ON_TABS');
+setup_print_on_off('OBJECTHISTORY_ARCHIVE_PDF_TOO');
+setup_print_on_off('OBJECTHISTORY_ARCHIVE_ON_MODIFY');
+setup_print_on_off('OBJECTHISTORY_USE_COMPRESS_ARCHIVE');
 
 // Example with imput
-setup_print_input_form_part('CONSTNAME', 'ParamLabel');
+//setup_print_input_form_part('CONSTNAME', 'ParamLabel');
 
 // Example with color
-setup_print_input_form_part('CONSTNAME', 'ParamLabel', 'ParamDesc', array('type'=>'color'),'input','ParamHelp');
+//setup_print_input_form_part('CONSTNAME', 'ParamLabel', 'ParamDesc', array('type'=>'color'),'input','ParamHelp');
 
 // Example with placeholder
 //setup_print_input_form_part('CONSTNAME','ParamLabel','ParamDesc',array('placeholder'=>'http://'),'input','ParamHelp');
