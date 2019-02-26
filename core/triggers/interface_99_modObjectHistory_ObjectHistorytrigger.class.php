@@ -135,6 +135,20 @@ class InterfaceObjectHistorytrigger
         // Put here code you want to execute when a Dolibarr business events occurs.
         // Data and type of action are stored into $object and $action
         // Users
+
+		if (in_array($action, array('PROPAL_DELETE', 'ORDER_DELETE', 'BILL_DELETE', 'SUPPLIER_PROPOSAL_DELETE', 'ORDER_SUPPLIER_DELETE', 'BILL_SUPPLIER_DELETE')))
+		{
+			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/objecthistory/config.php');
+			dol_include_once('/objecthistory/class/objecthistory.class.php');
+
+			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
+			foreach ($TVersion as $objecthistory)
+			{
+				$objecthistory->delete($user);
+			}
+		}
+
         if ($action == 'USER_LOGIN') {
             dol_syslog(
                 "Trigger '" . $this->name . "' for action '$action' launched by " . __FILE__ . ". id=" . $object->id

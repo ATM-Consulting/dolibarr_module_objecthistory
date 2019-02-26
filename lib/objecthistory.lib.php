@@ -119,3 +119,49 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
 
     return $formconfirm;
 }
+
+/**
+ * @param Propal|Commande|Facture|SupplierProposal|CommandeFournisseur|FactureFournisseur $object
+ * @param ObjectHistory[] $TVersion
+ * @return string
+ */
+function getHtmlListObjectHistory($object, $TVersion)
+{
+	global $db,$conf,$langs;
+
+	$html = '';
+
+	if (!empty($TVersion))
+	{
+		$html.= '<div id="formListe" style="clear:both; margin:15px 0">'.PHP_EOL;
+		$html.= '<form name="formVoirPropale" method="POST" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">'.PHP_EOL;
+		$html.= '<input type="hidden" name="actionATM" value="viewVersion" />'.PHP_EOL;
+		$html.= '<input type="hidden" name="socid" value="'.(!empty($object->fk_soc) ? $object->fk_soc : $object->socid).'" />'.PHP_EOL;
+		$html.= '<select name="idVersion">'.PHP_EOL;
+
+		$i = 1;
+		$idVersion = GETPOST('idVersion', 'int');
+		foreach($TVersion as &$objecthistory)
+		{
+			if($idVersion == $objecthistory->id) $selected = 'selected="selected"';
+			else $selected = "";
+
+			$html.= '<option id="'.$objecthistory->id.'" value="'.$objecthistory->id.'" '.$selected.'>Version n° '.$i.' - '.price($objecthistory->total).' '.$langs->getCurrencySymbol($conf->currency,0).' - '.dol_print_date($objecthistory->date_creation, "dayhour").'</option>'.PHP_EOL;
+
+			$i++;
+		}
+
+		$html.= '</select>'.PHP_EOL;
+		$html.= '<input class="butAction" id="voir" value="'.$langs->trans('Visualiser').'" type="SUBMIT" />'.PHP_EOL;
+		$html.= '</form>'.PHP_EOL;
+		$html.= '</div>'.PHP_EOL;
+
+		$html.= '<script type="text/javascript">
+					$(document).ready(function(){
+						$("#formListe").appendTo(\'div.tabsAction\');
+					})
+				</script>'.PHP_EOL;
+	}
+
+	return $html;
+}

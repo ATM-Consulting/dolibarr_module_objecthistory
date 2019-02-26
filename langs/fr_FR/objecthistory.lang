@@ -29,3 +29,8 @@ ConfirmMigrateObjectHistory=Avertissement : la migration des données peut prend
 
 objecthistory_errorDuringMigration=Erreur durant le processus de migration (%s)
 objecthistory_migrationSuccess=Succès de la migration des données
+
+ReturnInitialVersion=Retour version courante
+ObjectHistoryArchiver=Archiver
+Visualiser=Visualiser
+Restaurer=Restaurer

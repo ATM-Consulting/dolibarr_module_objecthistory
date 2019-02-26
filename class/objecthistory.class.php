@@ -49,5 +49,125 @@ class ObjectHistory extends SeedObject
 		$this->entity = $conf->entity;
 	}
 
+	public function unserializeObject()
+	{
+		$code = gzinflate(base64_decode($this->serialized_object_source));
+		if($code === false) {
+			$code = $this->serialized_object_source;
+		}
 
+		$object_source = unserialize($code);
+		if($object_source === false) $object_source = unserialize(utf8_decode($code));
+
+		return $object_source;
+	}
+
+	public function serializeObject(&$object)
+	{
+		global $conf;
+
+		$code = serialize($object);
+		if(!empty($conf->global->OBJECTHISTORY_USE_COMPRESS_ARCHIVE)) $code = base64_encode( gzdeflate($code) );
+
+		$this->serialized_object_source = $code;
+	}
+
+	/**
+	 * @param int $fk_source
+	 * @param string $element_source
+	 * @return ObjectHistory[]
+	 */
+	public static function getAllVersionBySourceId($fk_source, $element_source)
+	{
+		global $db;
+
+		$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.'objecthistory WHERE fk_source = '.$fk_source.' AND element_source = \''.$db->escape($element_source).'\'';
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$TRes = array();
+			while ($obj = $db->fetch_object($resql))
+			{
+				$o = new ObjectHistory($db);
+				$o->fetch($obj->rowid);
+				$TRes[$o->id] = $o;
+			}
+
+			return $TRes;
+		}
+		else
+		{
+			dol_print_error($db);
+			exit;
+		}
+	}
+
+	public static function archiveObject(&$object)
+	{
+		global $db,$conf;
+
+		if (!empty($conf->global->OBJECTHISTORY_ARCHIVE_PDF_TOO)) self::archivePDF($object);
+
+		$newVersion = new ObjectHistory($db);
+		$newVersion->setObject($object);
+
+		$newVersion->fk_source = $object->id;
+		$newVersion->element_source = $object->element;
+		$newVersion->date_version = dol_now();
+		$newVersion->total = $object->total_ht;
+		$newVersion->entity = $object->entity;
+
+		return $newVersion->create($user);
+
+		// TODO move to action file
+		?>
+		<script language="javascript">
+			//document.location.href="<?php echo $_SERVER['PHP_SELF'] ?>?id=<?php echo $_REQUEST['id']?>&mesg=<?php echo $langs->transnoentities('HistoryVersionSuccessfullArchived') ?>";
+		</script>
+		<?php
+
+	}
+
+	static function archivePDF(&$object)
+	{
+		global $db;
+
+		$sql = " SELECT count(*) as nb";
+		$sql.= " FROM ".MAIN_DB_PREFIX."objecthistory";
+		$sql.= " WHERE fk_source = ".$object->id;
+		$sql.= " WHERE element_source = '".$db->escape($object->element)."'";
+		$resql = $db->query($sql);
+
+		$nb=1;
+		if ($resql && ($row = $db->fetch_object($resql))) $nb = $row->nb + 1;
+
+		$ok = 1;
+
+		// TODO init le bon dossier en fonction de l'objet
+		if ($object->entity > 1) {
+			$filename = DOL_DATA_ROOT . '/' . $object->entity . '/propale/' . $object->ref . '/' .$object->ref;
+			$path = DOL_DATA_ROOT . '/' . $object->entity . '/propale/' . $object->ref . '/' .$object->ref . '.pdf';
+		}
+		else {
+			$filename = DOL_DATA_ROOT . '/propale/' . $object->ref . '/' .$object->ref;
+			$path = DOL_DATA_ROOT . '/propale/' . $object->ref . '/' .$object->ref . '.pdf';
+		}
+
+		if (!is_file($path)) $ok = self::generatePDF($object);
+
+		if ($ok > 0)
+		{
+			exec('cp "'.$path.'" "'.$filename.'-'.$nb.'.pdf"');
+		}
+	}
+
+	static function generatePDF(&$object)
+	{
+		global $conf,$langs;
+
+		if (method_exists($object, 'generateDocument'))
+			return $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs, 0, 0, 0);
+
+		return false;
+	}
 }
