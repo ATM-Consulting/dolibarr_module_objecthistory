@@ -20,3 +20,12 @@ OBJECTHISTORY_HIDE_VERSION_ON_TABS=Masquer le numéro de version dans les onglet
 OBJECTHISTORY_ARCHIVE_PDF_TOO=Archiver aussi le PDF
 OBJECTHISTORY_ARCHIVE_ON_MODIFY=Demander l'archivage à la modification de l'objet
 OBJECTHISTORY_USE_COMPRESS_ARCHIVE=Compression des données en base
+
+objecthistory_nb_line=Nombre de lignes présentes dans la table du module "Propale-Historique" : %d
+objecthistory_action_migrate=Migrer les données
+
+MigrateObjectHistory=Migration
+ConfirmMigrateObjectHistory=Avertissement : la migration des données peut prendre un temps considérable, êtes-vous sûr de vouloir continuer ?
+
+objecthistory_errorDuringMigration=Erreur durant le processus de migration (%s)
+objecthistory_migrationSuccess=Succès de la migration des données

@@ -32,10 +32,20 @@ function objecthistoryAdminPrepareHead()
     $h = 0;
     $head = array();
 
-    $head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_setup.php", 1);
-    $head[$h][1] = $langs->trans("Parameters");
-    $head[$h][2] = 'settings';
-    $h++;
+	$head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_setup.php", 1);
+	$head[$h][1] = $langs->trans("Parameters");
+	$head[$h][2] = 'settings';
+	$h++;
+
+	$res = dol_include_once('/propalehistory/config.php');
+	if ($res)
+	{
+		$head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_migrate_propalehistory.php", 1);
+		$head[$h][1] = $langs->trans("Module104090Name");
+		$head[$h][2] = 'propalehistory';
+		$h++;
+	}
+
     $head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_about.php", 1);
     $head[$h][1] = $langs->trans("About");
     $head[$h][2] = 'about';
@@ -79,27 +89,33 @@ function objecthistory_prepare_head(ObjectHistory $object)
 	return $head;
 }
 
-function getFormConfirmObjectHistory(&$PDOdb, &$form, &$object, $action)
+/**
+ * @param Form $form
+ * @param ObjectHistory $object
+ * @param string $action
+ * @return string
+ */
+function getFormConfirmObjectHistory(&$form, &$object, $action)
 {
-    global $langs,$conf,$user;
+    global $langs,$user;
 
     $formconfirm = '';
 
-    if ($action == 'validate' && !empty($user->rights->objecthistory->write))
+    if ($action == 'migrate' && !empty($user->admin))
     {
-        $text = $langs->trans('ConfirmValidateObjectHistory', $object->ref);
-        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('ValidateObjectHistory'), $text, 'confirm_validate', '', 0, 1);
+        $text = $langs->trans('ConfirmMigrateObjectHistory');
+        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('MigrateObjectHistory'), $text, 'confirm_migrate', '', 0, 1);
     }
-    elseif ($action == 'delete' && !empty($user->rights->objecthistory->write))
-    {
-        $text = $langs->trans('ConfirmDeleteObjectHistory');
-        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('DeleteObjectHistory'), $text, 'confirm_delete', '', 0, 1);
-    }
-    elseif ($action == 'clone' && !empty($user->rights->objecthistory->write))
-    {
-        $text = $langs->trans('ConfirmCloneObjectHistory', $object->ref);
-        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CloneObjectHistory'), $text, 'confirm_clone', '', 0, 1);
-    }
+//    elseif ($action == 'delete' && !empty($user->rights->objecthistory->write))
+//    {
+//        $text = $langs->trans('ConfirmDeleteObjectHistory');
+//        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('DeleteObjectHistory'), $text, 'confirm_delete', '', 0, 1);
+//    }
+//    elseif ($action == 'clone' && !empty($user->rights->objecthistory->write))
+//    {
+//        $text = $langs->trans('ConfirmCloneObjectHistory', $object->ref);
+//        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CloneObjectHistory'), $text, 'confirm_clone', '', 0, 1);
+//    }
 
     return $formconfirm;
 }
