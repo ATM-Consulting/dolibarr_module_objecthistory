@@ -120,12 +120,12 @@ class ObjectHistory extends SeedObject
 
 	public static function archivePDF(&$object)
 	{
-		global $db;
+		global $db,$conf;
 
 		$sql = " SELECT count(*) as nb";
 		$sql.= " FROM ".MAIN_DB_PREFIX."objecthistory";
 		$sql.= " WHERE fk_source = ".$object->id;
-		$sql.= " WHERE element_source = '".$db->escape($object->element)."'";
+		$sql.= " AND element_source = '".$db->escape($object->element)."'";
 		$resql = $db->query($sql);
 
 		$nb=1;
@@ -133,21 +133,19 @@ class ObjectHistory extends SeedObject
 
 		$ok = 1;
 
-		// TODO init le bon dossier en fonction de l'objet
-		if ($object->entity > 1) {
-			$filename = DOL_DATA_ROOT . '/' . $object->entity . '/propale/' . $object->ref . '/' .$object->ref;
-			$path = DOL_DATA_ROOT . '/' . $object->entity . '/propale/' . $object->ref . '/' .$object->ref . '.pdf';
-		}
-		else {
-			$filename = DOL_DATA_ROOT . '/propale/' . $object->ref . '/' .$object->ref;
-			$path = DOL_DATA_ROOT . '/propale/' . $object->ref . '/' .$object->ref . '.pdf';
-		}
+		$filename = dol_sanitizeFileName($object->ref);
 
-		if (!is_file($path)) $ok = self::generatePDF($object);
+		if ($object->element == 'propal') $filedir = $conf->propal->multidir_output[$object->entity] . "/" . $filename;
+		elseif ($object->element == 'commande') $filedir = $conf->commande->dir_output . '/' . $filename;
+		elseif ($object->element == 'supplier_proposal') $filedir = $conf->supplier_proposal->dir_output . '/' . $filename;
+		elseif ($object->element == 'order_supplier') $filedir = $conf->fournisseur->commande->dir_output . '/' . $filename;
+		else return 0;
+
+		if (!is_file($filedir.'/'.$filename.'.pdf')) $ok = self::generatePDF($object);
 
 		if ($ok > 0)
 		{
-			exec('cp "'.$path.'" "'.$filename.'-'.$nb.'.pdf"');
+			exec('cp "'.$filedir.'/'.$filename.'.pdf'.'" "'.$filedir.'/'.$filename.'-'.$nb.'.pdf"');
 		}
 	}
 
@@ -161,10 +159,18 @@ class ObjectHistory extends SeedObject
 
 		if (method_exists($object, 'generateDocument'))
 		{
-			if ($object->element == 'propal') $res = $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs, 0, 0, 0);
-			elseif ($object->element == 'commande') $res = $object->generateDocument($conf->global->COMMANDE_ADDON_PDF, $langs, 0, 0, 0);
-			elseif ($object->element == 'supplier_proposal') $res = $object->generateDocument($conf->global->SUPPLIER_PROPOSAL_ADDON_PDF, $langs, 0, 0, 0);
-			elseif ($object->element == 'supplier_order') $res = $object->generateDocument($conf->global->COMMANDE_SUPPLIER_ADDON_PDF, $langs, 0, 0, 0);
+			global $hidedetails,$hidedesc,$hideref,$moreparams;
+
+			if (empty($hidedetails)) $hidedetails=0;
+			if (empty($hidedesc)) $hidedesc=0;
+			if (empty($hideref)) $hideref=0;
+			if (empty($moreparams)) $moreparams=null;
+
+			// $object->modelpdf ?
+			if ($object->element == 'propal') $res = $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs,$hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'commande') $res = $object->generateDocument($conf->global->COMMANDE_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'supplier_proposal') $res = $object->generateDocument($conf->global->SUPPLIER_PROPOSAL_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'supplier_order') $res = $object->generateDocument($conf->global->COMMANDE_SUPPLIER_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
 			return $res;
 		}
