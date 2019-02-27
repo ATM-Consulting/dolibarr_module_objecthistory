@@ -26,7 +26,7 @@ class ObjectHistory extends SeedObject
 	public $total;
 	/** @var int $entity */
 	public $entity;
-	/** @var Propal|Commande|Facture|SupplierProposal|CommandeFournisseur|FactureFournisseur|string $serialized_object_source */
+	/** @var Propal|Commande|SupplierProposal|CommandeFournisseur|string $serialized_object_source */
 	public $serialized_object_source;
 
 	public function __construct($db)
@@ -118,7 +118,7 @@ class ObjectHistory extends SeedObject
 		return $newVersion->create($user);
 	}
 
-	static function archivePDF(&$object)
+	public static function archivePDF(&$object)
 	{
 		global $db;
 
@@ -151,14 +151,92 @@ class ObjectHistory extends SeedObject
 		}
 	}
 
-	static function generatePDF(&$object)
+	/**
+	 * @param Propal|Commande|SupplierProposal|CommandeFournisseur $object
+	 * @return bool
+	 */
+	public static function generatePDF(&$object)
 	{
 		global $conf,$langs;
 
 		if (method_exists($object, 'generateDocument'))
-			return $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs, 0, 0, 0);
+		{
+			if ($object->element == 'propal') $res = $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs, 0, 0, 0);
+			elseif ($object->element == 'commande') $res = $object->generateDocument($conf->global->COMMANDE_ADDON_PDF, $langs, 0, 0, 0);
+			elseif ($object->element == 'supplier_proposal') $res = $object->generateDocument($conf->global->SUPPLIER_PROPOSAL_ADDON_PDF, $langs, 0, 0, 0);
+			elseif ($object->element == 'supplier_order') $res = $object->generateDocument($conf->global->COMMANDE_SUPPLIER_ADDON_PDF, $langs, 0, 0, 0);
+
+			return $res;
+		}
 
 		return false;
+	}
+
+	/**
+	 * @param Propal|Commande|SupplierProposal|CommandeFournisseur	$object
+	 * @param int 	$fk_version
+	 */
+	public static function restoreObject(&$object, $fk_version)
+	{
+		global $db,$conf,$user,$langs;
+
+		$version = new ObjectHistory($db);
+		$version->fetch($fk_version);
+		$version->unserializeObject();
+//var_dump(count($version->serialized_object_source->lines), $version->serialized_object_source->total_ht);exit;
+		$object->statut = 0;
+		foreach($object->lines as $line)
+		{
+			if ($object->element == 'commande') $object->deleteline($user, $line->id);
+			else $object->deleteline($line->id);
+		}
+
+		if ($object->element == 'supplier_proposal')
+		{
+			$old_val = $conf->global->SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY;
+			$conf->global->SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY = 0;
+		}
+		elseif ($object->element == 'order_supplier')
+		{
+			$old_val = $conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY;
+			$conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY = 0;
+		}
+
+		foreach($version->serialized_object_source->lines as $line)
+		{
+			if ($object->element == 'propal') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', '', $line->info_bits, $line->product_type, $line->rang, $line->special_code, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->fk_remise_except);
+			elseif ($object->element == 'commande') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->info_bits, $line->fk_remise_except, 'HT', '', $line->date_start, $line->date_end, $line->product_type, $line->rang, $line->special_code, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->fk_unit);
+			// elseif ($object->element == 'facture') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, $line->date_start, $line->date_end, $line->fk_code_ventilation, $line->info_bits, $line->fk_remise_except, 'HT', '', $line->product_type, $line->rang, $line->special_code, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->situation_percent, $line->fk_prev_id, $line->fk_unit);
+			elseif ($object->element == 'supplier_proposal') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', '', $line->info_bits, $line->product_type, $line->rang, $line->special_code, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->array_options, $line->ref_fourn, $line->fk_unit);
+			elseif ($object->element == 'order_supplier') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, 0, $line->ref_supplier, $line->remise_percent, 'HT', '', $line->product_type, $line->info_bits, false, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit);
+		}
+
+		if ($object->element == 'supplier_proposal') $conf->global->SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY = $old_val;
+		elseif ($object->element == 'order_supplier') $conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY = $old_val;
+
+
+		if ($object->element == 'order_supplier') $object->setStatus($user, 0);
+		else $object->set_draft($user);
+
+
+		if (method_exists($object, 'set_availability')) $object->set_availability($user, $version->serialized_object_source->availability_id);
+		if (method_exists($object, 'set_date')) $object->set_date($user, $version->serialized_object_source->date);
+		if (method_exists($object, 'set_date_livraison')) $object->set_date_livraison($user, $version->serialized_object_source->date_livraison);
+
+		if (method_exists($object, 'set_echeance')) $object->set_echeance($user, $version->serialized_object_source->fin_validite);
+		if (method_exists($object, 'set_ref_client')) $object->set_ref_client($user, $version->serialized_object_source->ref_client);
+
+		if (method_exists($object, 'set_demand_reason')) $object->set_demand_reason($user, $version->serialized_object_source->demand_reason_id);
+		if (method_exists($object, 'setPaymentMethods')) $object->setPaymentMethods($version->serialized_object_source->mode_reglement_id);
+		if (method_exists($object, 'setPaymentTerms')) $object->setPaymentTerms($version->serialized_object_source->cond_reglement_id);
+		if (method_exists($object, 'valid'))
+		{
+			if ($object->element == 'commande' || $object->element == 'order_supplier') $object->valid($user, 0, 1);
+			else $object->valid($user, 1);
+		}
+
+		$object->fetch($object->id); //reload for generatePDF
+		self::generatePDF($object);
 	}
 }
 

@@ -39,6 +39,6 @@ ObjectHistoryVersionSuccessfullDelete=Version historisée supprimée avec succè
 ObjectHistoryVersionSuccessfullArchived=Version de proposition archivée avec succès
 ObjectHistoryVersionSuccessfullRestored=Version de proposition restaurée avec succès
 
-ArchiveObject=Archiver
-ArchiveObjectCheckboxLabel=Voulez-vous archiver l'objet ?
+ObjectHistoryModify=Rouvrir
+ArchiveObjectCheckboxLabel=Voulez-vous archiver l'objet avant sa réouverture ?
 ConfirmModifyObject=Veuillez confirmer votre réponse

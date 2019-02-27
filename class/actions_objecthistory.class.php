@@ -84,8 +84,8 @@ class ActionsObjectHistory
 
 			if (! empty($conf->global->OBJECTHISTORY_ARCHIVE_ON_MODIFY))
 			{
-				// TODO commande fourn = reopen
-				// TODO facture fourn = edit
+				// CommandeFournisseur = reopen
+				// FactureFournisseur = edit
 				if (in_array($action, array('modif', 'reopen', 'edit')))
 				{
 					$action = 'objecthistory_modif';
@@ -93,23 +93,24 @@ class ActionsObjectHistory
 				}
 
 				// Ask if proposal archive wanted
-				if ($action == 'objecthistory_confirm_modify') {
-
+				if ($action == 'objecthistory_confirm_modify')
+				{
 					// New version if wanted
 					$archive_object = GETPOST('archive_object', 'alpha');
 					if ($archive_object == 'on')
 					{
 //						TPropaleHist::archiverPropale($ATMdb, $object);
-
 						$res = ObjectHistory::archiveObject($object);
 
 						if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
 						else setEventMessage($db->lasterror(), 'errors');
 					}
 
+					// CommandeFournisseur = reopen
+					// FactureFournisseur = edit
 					// On provoque le repassage-en brouillon avec l'action de base
 					if ($object->element == 'order_supplier') $action = 'reopen';
-					else if ($object->element == 'invoice_supplier') $action = 'edit';
+					elseif ($object->element == 'invoice_supplier') $action = 'edit';
 					else $action = 'modif';
 
 					return 0; // Do standard code
@@ -122,14 +123,14 @@ class ActionsObjectHistory
 				$id = $object->id;
 
 				if ($object->element == 'propal') $object = new PropalHistory($db);
-				else if ($object->element == 'commande') $object = new CommandeHistory($db);
-				else if ($object->element == 'facture') $object = new FactureHistory($db);
-				else if ($object->element == 'supplier_proposal') $object = new SupplierProposalHistory($db);
-				else if ($object->element == 'order_supplier') $object = new CommandeFournisseurHistory($db);
-				else if ($object->element == 'invoice_supplier') $object = new FactureFournisseurHistory($db);
+				elseif ($object->element == 'commande') $object = new CommandeHistory($db);
+				elseif ($object->element == 'facture') $object = new FactureHistory($db);
+				elseif ($object->element == 'supplier_proposal') $object = new SupplierProposalHistory($db);
+				elseif ($object->element == 'order_supplier') $object = new CommandeFournisseurHistory($db);
+				elseif ($object->element == 'invoice_supplier') $object = new FactureFournisseurHistory($db);
 				else
 				{
-					// Not handle
+					// Object not handled
 					return 0;
 				}
 
@@ -164,8 +165,9 @@ class ActionsObjectHistory
 
 				return 1;
 
-			} elseif($actionATM == 'createVersion') {
-
+			}
+			elseif($actionATM == 'createVersion')
+			{
 				$res = ObjectHistory::archiveObject($object);
 
 				if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
@@ -175,10 +177,12 @@ class ActionsObjectHistory
 				exit;
 
 //				TPropaleHist::archiverPropale($ATMdb, $object);
+			}
+			elseif($actionATM == 'restaurer')
+			{
 
-			} elseif($actionATM == 'restaurer') {
-
-				TPropaleHist::restaurerPropale($ATMdb, $object);
+				$res = ObjectHistory::restoreObject($object, GETPOST('idVersion'));
+//				TPropaleHist::restaurerPropale($ATMdb, $object);
 
 			}
 			elseif($actionATM == 'supprimer')

@@ -95,11 +95,8 @@ class modObjectHistory extends DolibarrModules
 			,'hooks' => array(
 				'propalcard'
 				,'ordercard'
-				,'invoicecard'
 				,'supplier_proposalcard'
 				,'ordersuppliercard'
-				,'invoicesuppliercard'
-//				,'contractcard'
 				,'pdfgeneration'
 			)
 		);

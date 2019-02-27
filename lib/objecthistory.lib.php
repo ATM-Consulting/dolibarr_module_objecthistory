@@ -118,7 +118,7 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
 				,'value' => 1
 			)
 		);
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ArchiveObject'), $langs->trans('ConfirmModifyObject', $object->ref), 'objecthistory_confirm_modify', $formquestion, 'yes', 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ObjectHistoryModify'), $langs->trans('ConfirmModifyObject', $object->ref), 'objecthistory_confirm_modify', $formquestion, 'yes', 1);
 	}
 //    elseif ($action == 'delete' && !empty($user->rights->objecthistory->write))
 //    {
