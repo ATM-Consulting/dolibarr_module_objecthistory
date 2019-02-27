@@ -136,7 +136,22 @@ class InterfaceObjectHistorytrigger
         // Data and type of action are stored into $object and $action
         // Users
 
-		if (in_array($action, array('PROPAL_DELETE', 'ORDER_DELETE', 'BILL_DELETE', 'SUPPLIER_PROPOSAL_DELETE', 'ORDER_SUPPLIER_DELETE', 'BILL_SUPPLIER_DELETE')))
+		if (!empty($conf->global->OBJECTHISTORY_AUTO_ARCHIVE) && in_array($action, array('PROPAL_VALIDATE', 'ORDER_VALIDATE', 'SUPPLIER_PROPOSAL_VALIDATE', 'ORDER_SUPPLIER_VALIDATE')))
+		{
+			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
+			dol_include_once('/objecthistory/config.php');
+			dol_include_once('/objecthistory/class/objecthistory.class.php');
+
+			$langs->load('objecthistory@objecthistory');
+
+			$res = ObjectHistory::archiveObject($object);
+
+			if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
+			else setEventMessage($this->db->lasterror(), 'errors');
+
+			return 1;
+		}
+		elseif (in_array($action, array('PROPAL_DELETE', 'ORDER_DELETE', 'SUPPLIER_PROPOSAL_DELETE', 'ORDER_SUPPLIER_DELETE')))
 		{
 			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
 			dol_include_once('/objecthistory/config.php');
@@ -147,6 +162,8 @@ class InterfaceObjectHistorytrigger
 			{
 				$objecthistory->delete($user);
 			}
+
+			return 1;
 		}
 
         if ($action == 'USER_LOGIN') {

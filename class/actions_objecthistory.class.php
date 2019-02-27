@@ -82,6 +82,8 @@ class ActionsObjectHistory
 			dol_include_once('/objecthistory/lib/objecthistory.lib.php');
 			dol_include_once('/objecthistory/class/objecthistory.class.php');
 
+			$langs->load('objecthistory@objecthistory');
+
 			if (! empty($conf->global->OBJECTHISTORY_ARCHIVE_ON_MODIFY))
 			{
 				// CommandeFournisseur = reopen
