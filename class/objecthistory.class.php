@@ -169,3 +169,71 @@ class ObjectHistory extends SeedObject
 		return false;
 	}
 }
+
+require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
+class PropalHistory extends Propal
+{
+	/** @override */
+	function getLinesArray()
+	{
+		return null;
+	}
+
+}
+
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+class CommandeHistory extends Commande
+{
+	/** @override */
+	function getLinesArray()
+	{
+		return null;
+	}
+
+}
+
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+class FactureHistory extends Facture
+{
+	/** @override */
+	function getLinesArray()
+	{
+		return null;
+	}
+
+}
+
+require_once DOL_DOCUMENT_ROOT.'/supplier_proposal/class/supplier_proposal.class.php';
+class SupplierProposalHistory extends SupplierProposal
+{
+	/** @override */
+	function getLinesArray()
+	{
+		return null;
+	}
+
+}
+
+// TODO check le fonctionnement => getLinesArray() NOT FOUND
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
+class CommandeFournisseurHistory extends CommandeFournisseur
+{
+//	/** @override */
+//	function getLinesArray()
+//	{
+//		return null;
+//	}
+
+}
+
+// TODO check le fonctionnement => getLinesArray() NOT FOUND
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
+class FactureFournisseurHistory extends FactureFournisseur
+{
+//	/** @override */
+//	function getLinesArray()
+//	{
+//		return null;
+//	}
+
+}

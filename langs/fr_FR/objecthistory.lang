@@ -34,3 +34,7 @@ ReturnInitialVersion=Retour version courante
 ObjectHistoryArchiver=Archiver
 Visualiser=Visualiser
 Restaurer=Restaurer
+
+ObjectHistoryVersionSuccessfullDelete=Version historisée supprimée avec succès
+ObjectHistoryVersionSuccessfullArchived=Version de proposition archivée avec succès
+ObjectHistoryVersionSuccessfullRestored=Version de proposition restaurée avec succès

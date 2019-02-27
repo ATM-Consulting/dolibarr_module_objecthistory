@@ -62,7 +62,7 @@ class ActionsObjectHistory
 	 */
 	function doActions($parameters, &$object, &$action, $hookmanager)
 	{
-		global $db,$conf,$langs;
+		global $db,$conf,$langs,$user;
 
 		$TContext = explode(':',$parameters['context']);
 		$THook = array(
@@ -104,16 +104,29 @@ class ActionsObjectHistory
 				}
 			}
 
-
-
 			$actionATM = GETPOST('actionATM');
 			if($actionATM == 'viewVersion')
 			{
+				$id = $object->id;
+
+				if ($object->element == 'propal') $object = new PropalHistory($db);
+				else if ($object->element == 'commande') $object = new CommandeHistory($db);
+				else if ($object->element == 'facture') $object = new FactureHistory($db);
+				else if ($object->element == 'supplier_proposal') $object = new SupplierProposalHistory($db);
+				else if ($object->element == 'order_supplier') $object = new CommandeFournisseurHistory($db);
+				else if ($object->element == 'invoice_supplier') $object = new FactureFournisseurHistory($db);
+				else
+				{
+					// Not handle
+					return 0;
+				}
+
+				$object->fetch($id);
+
 				$version = new ObjectHistory($db);
 				$version->fetch(GETPOST('idVersion'));
 				$version->unserializeObject();
 
-//				$obj = $version->serialized_object_source;
 				if (!empty($object->fields))
 				{
 					foreach ($object->fields as $key => &$val)
@@ -137,21 +150,8 @@ class ActionsObjectHistory
 					}
 				}
 
-//				$propal = $version->getObject();
-//				//pre($propal,true);
-//
-//				$object = new PropalHist($db, $object->socid);
-//				foreach($propal as $k=>$v) $object->{$k} = $v;
-//
-//				foreach($object->lines as &$line) {
-//					$line->description  = $line->desc;
-//					$line->db =  $db;
-//					//$line->fetch_optionals();
-//				}
+				return 1;
 
-				//pre($object,true);
-//				$object->id = $_REQUEST['id'];
-//				$object->db = $db;
 			} elseif($actionATM == 'createVersion') {
 
 				TPropaleHist::archiverPropale($ATMdb, $object);
@@ -160,39 +160,27 @@ class ActionsObjectHistory
 
 				TPropaleHist::restaurerPropale($ATMdb, $object);
 
-			} elseif($actionATM == 'supprimer') {
+			}
+			elseif($actionATM == 'supprimer')
+			{
+				$version = new ObjectHistory($db);
+				$version->fetch(GETPOST('idVersion'));
 
-				$version = new TPropaleHist;
-				$version->load($ATMdb, $_REQUEST['idVersion']);
-				$version->delete($ATMdb);
+				if ($version->delete($user) > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullDelete'));
+				else setEventMessage($db->lasterror(), 'errors');
 
-				?>
-				<script language="javascript">
-					document.location.href="<?php echo $_SERVER['PHP_SELF'] ?>?id=<?php echo $_REQUEST['id']?>&mesg=<?php echo $langs->transnoentities('HistoryVersionSuccessfullDelete') ?>";
-				</script>
-				<?php
-
+				header('Location: '.$_SERVER['PHP_SELF'].'?id='.GETPOST('id'));
+				exit;
 			}
 
 
 		}
 
-
-
-
 		return 0;
 	}
 
-	/**
-	 * Overloading the doActions function : replacing the parent's function with the one below
-	 *
-	 * @param   array()         $parameters     Hook metadatas (context, etc...)
-	 * @param   CommonObject    &$object        The object to process (an invoice if you are in invoice module, a propale in propale's module, etc...)
-	 * @param   string          &$action        Current action (if set). Generally create or edit or null
-	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
-	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
-	 */
-	function formObjectOptions($parameters, &$object, &$action, $hookmanager)
+
+	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf,$langs;
 
@@ -209,72 +197,28 @@ class ActionsObjectHistory
 		$interSect = array_intersect($TContext, $THook);
 		if (!empty($interSect))
 		{
+			$langs->load('objecthistory@objecthistory');
+
 			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
 			dol_include_once('/objecthistory/config.php');
 			dol_include_once('/objecthistory/lib/objecthistory.lib.php');
 			dol_include_once('/objecthistory/class/objecthistory.class.php');
 
-			if($action != 'create' && $action != 'statut' && $action != 'presend')
-			{
-				$langs->load('objecthistory@objecthistory');
+			$actionATM = GETPOST('actionATM');
 
-				$actionATM = GETPOST('actionATM');
-				$from = $_SERVER['HTTP_REFERER'];
+			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
+			print getHtmlListObjectHistory($object, $TVersion, $actionATM);
 
-				if($actionATM == 'viewVersion')
-				{
-					?>
-					<script type="text/javascript">
-						$(document).ready(function() {
-							$('div.tabsAction').html('<?php echo '<div><a id="returnCurrent" href="'.$_SERVER['PHP_SELF'].'?id='.$_REQUEST['id'].'">'.$langs->trans('ReturnInitialVersion').'</a> <a id="butRestaurer" class="butAction" href="'.$from.'?id='.$_REQUEST['id'].'&actionATM=restaurer&idVersion='.$_REQUEST['idVersion'].'">'.$langs->trans('Restaurer').'</a><a id="butSupprimer" class="butAction" href="'.$from.'?id='.$_REQUEST['id'].'&actionATM=supprimer&idVersion='.$_REQUEST['idVersion'].'">'.$langs->trans('Delete').'</a></div>'?>');
-							$('#butRestaurer').insertAfter('#voir');
-							$('#butSupprimer').insertBefore('#voir');
-							$('#builddoc_form').hide();
-						})
-					</script>
+			$num = count($TVersion)+1; // TODO voir pour afficher le bon numéro de version si on est en mode visu
+			print '<script type="text/javascript">
+						$("#id-right div.tabsElem a:first").append(" / v.'.$num.'");
+//						console.log($("#id-right div.tabsElem a:first"));
+					</script>';
 
-					<?php
-
-					$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
-					print getHtmlListObjectHistory($object, $TVersion);
-//					TPropaleHist::listeVersions($db, $object);
-				} elseif($actionATM == 'createVersion') {
-					$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
-					print getHtmlListObjectHistory($object, $TVersion);
-//					TPropaleHist::listeVersions($db, $object);
-				} elseif($actionATM == '' && $object->statut == 1) {
-					print '<a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$_REQUEST['id'].'&actionATM=createVersion">'.$langs->trans('ObjectHistoryArchiver').'</a>';
-					?>
-					<script type="text/javascript">
-						$(document).ready(function() {
-							$("#butNewVersion").appendTo('div.tabsAction');
-						})
-					</script>
-					<?php
-//					$num = TPropaleHist::listeVersions($db, $object);
-					$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
-					print getHtmlListObjectHistory($object, $TVersion);
-				}
-				else {
-
-//					$num = TPropaleHist::listeVersions($db, $object);
-					$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
-					print getHtmlListObjectHistory($object, $TVersion);
-
-
-				}
-				if(!empty($TVersion) && ! $conf->global->OBJECTHISTORY_HIDE_VERSION_ON_TABS) {
-					?>
-					<script type="text/javascript">
-						$("a#comm").first().append(" / v. <?php echo (count($TVersion)+1) ?>");
-						console.log($("a#comm").first());
-					</script>
-					<?php
-
-				}
-			}
+			if ($actionATM == 'viewVersion') return 1;
 		}
 
 		return 0;
 	}
+
 }

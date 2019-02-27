@@ -76,7 +76,7 @@ if ($action == 'confirm_migrate' && !empty($user->admin))
 				$o->total = $propalehistory->total;
 				$o->entity = $obj->entity;
 				$o->serialized_object_source = $propalehistory->serialized_parent_propale;
-				$o->date_creation = $propalehistory->date_cre; // TODO voir si ça fonctionne
+				$o->date_creation = $propalehistory->date_cre;
 
 				$res = $o->create($user);
 				if ($res <= 0)
