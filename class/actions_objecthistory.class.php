@@ -44,6 +44,21 @@ class ActionsObjectHistory
 	public $errors = array();
 
 	/**
+	 * @var array Hooks allowed
+	 */
+	public $THook = array(
+		'propalcard'
+		,'ordercard'
+		,'supplier_proposalcard'
+		,'ordersuppliercard'
+	);
+
+	/**
+	 * @var string
+	 */
+	public $old_object_ref;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct($db)
@@ -65,16 +80,8 @@ class ActionsObjectHistory
 		global $db,$conf,$langs,$user;
 
 		$TContext = explode(':',$parameters['context']);
-		$THook = array(
-			'propalcard'
-			,'ordercard'
-			,'invoicecard'
-			,'supplier_proposalcard'
-			,'ordersuppliercard'
-			,'invoicesuppliercard'
-		);
 
-		$interSect = array_intersect($TContext, $THook);
+		$interSect = array_intersect($TContext, $this->THook);
 		if (!empty($interSect))
 		{
 			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
@@ -227,16 +234,8 @@ class ActionsObjectHistory
 		global $conf,$langs;
 
 		$TContext = explode(':',$parameters['context']);
-		$THook = array(
-			'propalcard'
-			,'ordercard'
-			,'invoicecard'
-			,'supplier_proposalcard'
-			,'ordersuppliercard'
-			,'invoicesuppliercard'
-		);
 
-		$interSect = array_intersect($TContext, $THook);
+		$interSect = array_intersect($TContext, $this->THook);
 		if (!empty($interSect))
 		{
 			$langs->load('objecthistory@objecthistory');
@@ -266,4 +265,45 @@ class ActionsObjectHistory
 		return 0;
 	}
 
+	function beforePDFCreation($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf;
+
+		if (!empty($conf->global->OBJECTHISTORY_SHOW_VERSION_PDF))
+		{
+			$TContext = explode(':',$parameters['context']);
+
+			$interSect = array_intersect($TContext, $this->THook);
+			if (!empty($interSect))
+			{
+				if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
+				dol_include_once('/objecthistory/config.php');
+				dol_include_once('/objecthistory/class/objecthistory.class.php');
+
+				$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
+				$num = count($TVersion);
+				if ($num > 0)
+				{
+					$this->old_object_ref = $object->ref;
+					$object->ref .='/'.($num+1);
+				}
+			}
+		}
+
+		return 0;
+	}
+
+	function afterPDFCreation($parameters, &$object, &$action, $hookmanager)
+	{
+		global $conf;
+
+		if (!empty($conf->global->OBJECTHISTORY_SHOW_VERSION_PDF) && !empty($this->old_object_ref))
+		{
+			$object_src = $parameters['object'];
+			if (!empty($object_src)) $object_src->ref = $this->old_object_ref;
+			else $object->ref = $this->old_object_ref;
+		}
+
+		return 0;
+	}
 }
