@@ -102,12 +102,12 @@ class ObjectHistory extends SeedObject
 
 	public static function archiveObject(&$object)
 	{
-		global $db,$conf;
+		global $db,$conf,$user;
 
 		if (!empty($conf->global->OBJECTHISTORY_ARCHIVE_PDF_TOO)) self::archivePDF($object);
 
 		$newVersion = new ObjectHistory($db);
-		$newVersion->setObject($object);
+		$newVersion->serializeObject($object);
 
 		$newVersion->fk_source = $object->id;
 		$newVersion->element_source = $object->element;
@@ -116,14 +116,6 @@ class ObjectHistory extends SeedObject
 		$newVersion->entity = $object->entity;
 
 		return $newVersion->create($user);
-
-		// TODO move to action file
-		?>
-		<script language="javascript">
-			//document.location.href="<?php echo $_SERVER['PHP_SELF'] ?>?id=<?php echo $_REQUEST['id']?>&mesg=<?php echo $langs->transnoentities('HistoryVersionSuccessfullArchived') ?>";
-		</script>
-		<?php
-
 	}
 
 	static function archivePDF(&$object)

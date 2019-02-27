@@ -86,19 +86,31 @@ class ActionsObjectHistory
 			{
 				// TODO commande fourn = reopen
 				// TODO facture fourn = edit
-				if (in_array($action, array('modif', 'reopen', 'edit'))) {
+				if (in_array($action, array('modif', 'reopen', 'edit')))
+				{
+					$action = 'objecthistory_modif';
 					return 1; // on saute l'action par défaut en retournant 1, puis on affiche la pop-in dans formConfirm()
 				}
 
 				// Ask if proposal archive wanted
-				if ($action == 'propalhistory_confirm_modify') {
+				if ($action == 'objecthistory_confirm_modify') {
 
 					// New version if wanted
-					$archive_proposal = GETPOST('archive_proposal', 'alpha');
-					if ($archive_proposal == 'on') {
-						TPropaleHist::archiverPropale($ATMdb, $object);
+					$archive_object = GETPOST('archive_object', 'alpha');
+					if ($archive_object == 'on')
+					{
+//						TPropaleHist::archiverPropale($ATMdb, $object);
+
+						$res = ObjectHistory::archiveObject($object);
+
+						if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
+						else setEventMessage($db->lasterror(), 'errors');
 					}
-					$action = 'modif'; // On provoque le repassage-en brouillon
+
+					// On provoque le repassage-en brouillon avec l'action de base
+					if ($object->element == 'order_supplier') $action = 'reopen';
+					else if ($object->element == 'invoice_supplier') $action = 'edit';
+					else $action = 'modif';
 
 					return 0; // Do standard code
 				}
@@ -154,7 +166,15 @@ class ActionsObjectHistory
 
 			} elseif($actionATM == 'createVersion') {
 
-				TPropaleHist::archiverPropale($ATMdb, $object);
+				$res = ObjectHistory::archiveObject($object);
+
+				if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
+				else setEventMessage($db->lasterror(), 'errors');
+
+				header('Location: '.$_SERVER['PHP_SELF'].'?id='.$object->id);
+				exit;
+
+//				TPropaleHist::archiverPropale($ATMdb, $object);
 
 			} elseif($actionATM == 'restaurer') {
 
@@ -179,6 +199,22 @@ class ActionsObjectHistory
 		return 0;
 	}
 
+	function formConfirm($parameters, &$object, &$action, $hookmanager)
+	{
+		global $langs;
+//		var_dump($this->showFormConfirmOnModif, $action);exit;
+		if ($action == 'objecthistory_modif')
+		{
+			$langs->load('objecthistory@objecthistory');
+
+			$form = new Form($this->db);
+			$formConfirm = getFormConfirmObjectHistory($form, $object, $action);
+			$this->results = array();
+			$this->resprints = $formConfirm;
+
+			return 1;
+		}
+	}
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
 	{
