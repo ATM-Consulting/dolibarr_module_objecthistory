@@ -35,9 +35,9 @@ ObjectHistoryArchiver=Archiver
 Visualiser=Visualiser
 Restaurer=Restaurer
 
-ObjectHistoryVersionSuccessfullDelete=Version historisée supprimée avec succès
-ObjectHistoryVersionSuccessfullArchived=Version de proposition archivée avec succès
-ObjectHistoryVersionSuccessfullRestored=Version de proposition restaurée avec succès
+ObjectHistoryVersionSuccessfullDelete=Version supprimée avec succès
+ObjectHistoryVersionSuccessfullArchived=Version archivée avec succès
+ObjectHistoryVersionSuccessfullRestored=Version restaurée avec succès
 
 ObjectHistoryModify=Rouvrir
 ArchiveObjectCheckboxLabel=Voulez-vous archiver l'objet avant sa réouverture ?
