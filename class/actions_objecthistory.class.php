@@ -250,10 +250,13 @@ class ActionsObjectHistory
 			print getHtmlListObjectHistory($object, $TVersion, $actionATM);
 
 			$num = count($TVersion)+1; // TODO voir pour afficher le bon numéro de version si on est en mode visu
-			print '<script type="text/javascript">
-						$("#id-right div.tabsElem a:first").append(" / v.'.$num.'");
-//						console.log($("#id-right div.tabsElem a:first"));
-					</script>';
+			if(!empty($num) && empty($conf->global->OBJECTHISTORY_HIDE_VERSION_ON_TABS))
+			{
+				print '<script type="text/javascript">
+							$("#id-right div.tabsElem a:first").append(" / v.'.$num.'");
+//							console.log($("#id-right div.tabsElem a:first"));
+						</script>';
+			}
 
 			if ($actionATM == 'viewVersion') return 1;
 		}
