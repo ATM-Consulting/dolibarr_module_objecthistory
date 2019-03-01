@@ -29,6 +29,11 @@
 class ActionsObjectHistory
 {
 	/**
+	 * @var DoliDB $db
+	 */
+	public $db;
+
+	/**
 	 * @var array Hook results. Propagated to $hookmanager->resArray for later reuse
 	 */
 	public $results = array();
@@ -63,7 +68,16 @@ class ActionsObjectHistory
 	 */
 	public function __construct($db)
 	{
+		global $langs;
+
 		$this->db = $db;
+
+		if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
+		dol_include_once('/objecthistory/config.php');
+		dol_include_once('/objecthistory/lib/objecthistory.lib.php');
+		dol_include_once('/objecthistory/class/objecthistory.class.php');
+
+		$langs->load('objecthistory@objecthistory');
 	}
 
 	/**
@@ -77,25 +91,19 @@ class ActionsObjectHistory
 	 */
 	function doActions($parameters, &$object, &$action, $hookmanager)
 	{
-		global $db,$conf,$langs,$user;
+		global $conf,$langs,$user;
 
 		$TContext = explode(':',$parameters['context']);
 
-		$interSect = array_intersect($TContext, $this->THook);
+		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
 		if (!empty($interSect))
 		{
-			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
-			dol_include_once('/objecthistory/config.php');
-			dol_include_once('/objecthistory/lib/objecthistory.lib.php');
-			dol_include_once('/objecthistory/class/objecthistory.class.php');
-
-			$langs->load('objecthistory@objecthistory');
-
 			if (! empty($conf->global->OBJECTHISTORY_ARCHIVE_ON_MODIFY))
 			{
 				// CommandeFournisseur = reopen
-				// FactureFournisseur = edit
-				if (in_array($action, array('modif', 'reopen', 'edit')))
+
+//				if (in_array($action, array('modif', 'reopen')))
+				if ($action == 'modif' || $object->element == 'order_supplier' && $object->statut == 2 && $action == 'reopen')
 				{
 					$action = 'objecthistory_modif';
 					return 1; // on saute l'action par défaut en retournant 1, puis on affiche la pop-in dans formConfirm()
@@ -112,11 +120,10 @@ class ActionsObjectHistory
 						$res = ObjectHistory::archiveObject($object);
 
 						if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
-						else setEventMessage($db->lasterror(), 'errors');
+						else setEventMessage($this->db->lasterror(), 'errors');
 					}
 
 					// CommandeFournisseur = reopen
-					// FactureFournisseur = edit
 					// On provoque le repassage-en brouillon avec l'action de base
 					if ($object->element == 'order_supplier') $action = 'reopen';
 					elseif ($object->element == 'invoice_supplier') $action = 'edit';
@@ -131,12 +138,10 @@ class ActionsObjectHistory
 			{
 				$id = $object->id;
 
-				if ($object->element == 'propal') $object = new PropalHistory($db);
-				elseif ($object->element == 'commande') $object = new CommandeHistory($db);
-				elseif ($object->element == 'facture') $object = new FactureHistory($db);
-				elseif ($object->element == 'supplier_proposal') $object = new SupplierProposalHistory($db);
-				elseif ($object->element == 'order_supplier') $object = new CommandeFournisseurHistory($db);
-				elseif ($object->element == 'invoice_supplier') $object = new FactureFournisseurHistory($db);
+				if ($object->element == 'propal') $object = new PropalHistory($this->db);
+				elseif ($object->element == 'commande') $object = new CommandeHistory($this->db);
+				elseif ($object->element == 'supplier_proposal') $object = new SupplierProposalHistory($this->db);
+				elseif ($object->element == 'order_supplier') $object = new CommandeFournisseurHistory($this->db);
 				else
 				{
 					// Object not handled
@@ -145,7 +150,7 @@ class ActionsObjectHistory
 
 				$object->fetch($id);
 
-				$version = new ObjectHistory($db);
+				$version = new ObjectHistory($this->db);
 				$version->fetch(GETPOST('idVersion'));
 				$version->unserializeObject();
 
@@ -167,7 +172,7 @@ class ActionsObjectHistory
 					foreach($object->lines as &$line)
 					{
 						$line->description  = $line->desc;
-						$line->db = $db;
+						$line->db = $this->db;
 						//$line->fetch_optionals();
 					}
 				}
@@ -180,27 +185,28 @@ class ActionsObjectHistory
 				$res = ObjectHistory::archiveObject($object);
 
 				if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullArchived'));
-				else setEventMessage($db->lasterror(), 'errors');
+				else setEventMessage($this->db->lasterror(), 'errors');
 
 				header('Location: '.$_SERVER['PHP_SELF'].'?id='.$object->id);
 				exit;
-
-//				TPropaleHist::archiverPropale($ATMdb, $object);
 			}
 			elseif($actionATM == 'restaurer')
 			{
-
 				$res = ObjectHistory::restoreObject($object, GETPOST('idVersion'));
-//				TPropaleHist::restaurerPropale($ATMdb, $object);
 
+				if ($res > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullRestored'));
+				else setEventMessage($this->db->lasterror(), 'errors');
+
+				header('Location: '.$_SERVER['PHP_SELF'].'?id='.$object->id);
+				exit;
 			}
 			elseif($actionATM == 'supprimer')
 			{
-				$version = new ObjectHistory($db);
+				$version = new ObjectHistory($this->db);
 				$version->fetch(GETPOST('idVersion'));
 
 				if ($version->delete($user) > 0) setEventMessage($langs->trans('ObjectHistoryVersionSuccessfullDelete'));
-				else setEventMessage($db->lasterror(), 'errors');
+				else setEventMessage($this->db->lasterror(), 'errors');
 
 				header('Location: '.$_SERVER['PHP_SELF'].'?id='.GETPOST('id'));
 				exit;
@@ -215,11 +221,9 @@ class ActionsObjectHistory
 	function formConfirm($parameters, &$object, &$action, $hookmanager)
 	{
 		global $langs;
-//		var_dump($this->showFormConfirmOnModif, $action);exit;
+
 		if ($action == 'objecthistory_modif')
 		{
-			$langs->load('objecthistory@objecthistory');
-
 			$form = new Form($this->db);
 			$formConfirm = getFormConfirmObjectHistory($form, $object, $action);
 			$this->results = array();
@@ -235,16 +239,9 @@ class ActionsObjectHistory
 
 		$TContext = explode(':',$parameters['context']);
 
-		$interSect = array_intersect($TContext, $this->THook);
+		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
 		if (!empty($interSect))
 		{
-			$langs->load('objecthistory@objecthistory');
-
-			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
-			dol_include_once('/objecthistory/config.php');
-			dol_include_once('/objecthistory/lib/objecthistory.lib.php');
-			dol_include_once('/objecthistory/class/objecthistory.class.php');
-
 			$actionATM = GETPOST('actionATM');
 
 			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
@@ -273,13 +270,9 @@ class ActionsObjectHistory
 		{
 			$TContext = explode(':',$parameters['context']);
 
-			$interSect = array_intersect($TContext, $this->THook);
+			$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
 			if (!empty($interSect))
 			{
-				if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
-				dol_include_once('/objecthistory/config.php');
-				dol_include_once('/objecthistory/class/objecthistory.class.php');
-
 				$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
 				$num = count($TVersion);
 				if ($num > 0)

@@ -14,12 +14,18 @@ ParamLabel=Nom du paramètre
 ParamDesc=Une description si besoin
 ParamHelp=Le contenu de l'aide
 
+OBJECTHISTORY_HOOKS_ALLOWED=Type de document concerné
 OBJECTHISTORY_AUTO_ARCHIVE=Archiver automatiquement l'objet lors de sa validation
 OBJECTHISTORY_SHOW_VERSION_PDF=Afficher le numéro de version sur le PDF (à partir du 2e)
 OBJECTHISTORY_HIDE_VERSION_ON_TABS=Masquer le numéro de version dans les onglets
 OBJECTHISTORY_ARCHIVE_PDF_TOO=Archiver aussi le PDF
 OBJECTHISTORY_ARCHIVE_ON_MODIFY=Demander l'archivage à la modification de l'objet
 OBJECTHISTORY_USE_COMPRESS_ARCHIVE=Compression des données en base
+
+objecthistory_propalcard=Proposition commerciale
+objecthistory_ordercard=Commande client
+objecthistory_supplier_proposalcard=Demande de prix fournisseur
+objecthistory_ordersuppliercard=Commande fournisseur
 
 objecthistory_nb_line=Nombre de lignes présentes dans la table du module "Propale-Historique" : %d
 objecthistory_action_migrate=Migrer les données

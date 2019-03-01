@@ -187,7 +187,7 @@ function getHtmlListObjectHistory($object, $TVersion, $actionATM)
 		}
 	}
 
-	if($actionATM == '' && $object->statut == 1) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&actionATM=createVersion">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
+	if($actionATM == '' && ($object->element != 'order_supplier' && $object->statut == 1 || $object->element == 'order_supplier' && $object->statut == 2)) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&actionATM=createVersion">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
 
 	return $html;
 }

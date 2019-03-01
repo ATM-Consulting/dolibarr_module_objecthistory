@@ -30,6 +30,7 @@ if (! $res) {
 
 // Libraries
 require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
+require_once '../class/objecthistory.class.php';
 require_once '../lib/objecthistory.lib.php';
 dol_include_once('abricot/includes/lib/admin.lib.php');
 
@@ -50,7 +51,10 @@ $action = GETPOST('action', 'alpha');
 if (preg_match('/set_(.*)/',$action,$reg))
 {
 	$code=$reg[1];
-	if (dolibarr_set_const($db, $code, GETPOST($code), 'chaine', 0, '', $conf->entity) > 0)
+	$val = GETPOST($code);
+	if ($code == 'OBJECTHISTORY_HOOKS_ALLOWED' && !empty($val)) $val = implode(',', $val);
+
+	if (dolibarr_set_const($db, $code, $val, 'chaine', 0, '', $conf->entity) > 0)
 	{
 		header("Location: ".$_SERVER["PHP_SELF"]);
 		exit;
@@ -109,6 +113,25 @@ if(!function_exists('setup_print_title')){
 }
 
 setup_print_title("Parameters");
+
+$var=!$var;
+
+print '<tr '.$bc[$var].'>';
+print '<td>'.$langs->trans('OBJECTHISTORY_HOOKS_ALLOWED').'</td>';
+print '<td align="center" width="20">&nbsp;</td>';
+print '<td align="right" width="500">';
+print '<form method="POST" action="'.$_SERVER['PHP_SELF'].'">';
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="set_OBJECTHISTORY_HOOKS_ALLOWED">';
+$THook = array();
+if (!empty($conf->propal->enabled)) $THook['propalcard'] = $langs->trans('objecthistory_propalcard');
+if (!empty($conf->commande->enabled)) $THook['ordercard'] = $langs->trans('objecthistory_ordercard');
+if (!empty($conf->supplier_proposal->enabled)) $THook['supplier_proposalcard'] = $langs->trans('objecthistory_supplier_proposalcard');
+if (!empty($conf->fournisseur->enabled)) $THook['ordersuppliercard'] = $langs->trans('objecthistory_ordersuppliercard');
+print $form->multiselectarray('OBJECTHISTORY_HOOKS_ALLOWED', $THook, ObjectHistory::getTHookAllowed());
+print '<input type="submit" class="butAction" value="'.$langs->trans("Modify").'">';
+print '</form>';
+print '</td></tr>';
 
 // Example with a yes / no select
 setup_print_on_off('OBJECTHISTORY_AUTO_ARCHIVE');
