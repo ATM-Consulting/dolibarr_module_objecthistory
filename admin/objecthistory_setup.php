@@ -86,13 +86,14 @@ $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
     . $langs->trans("BackToModuleList") . '</a>';
 print load_fiche_titre($langs->trans($page_name), $linkback);
 
+$notab = -1;
 // Configuration header
 $head = objecthistoryAdminPrepareHead();
 dol_fiche_head(
     $head,
     'settings',
     $langs->trans("Module104089Name"),
-    0,
+	$notab,
     "objecthistory@objecthistory"
 );
 
@@ -111,10 +112,10 @@ setup_print_title("Parameters");
 
 // Example with a yes / no select
 setup_print_on_off('OBJECTHISTORY_AUTO_ARCHIVE');
+setup_print_on_off('OBJECTHISTORY_ARCHIVE_ON_MODIFY');
 setup_print_on_off('OBJECTHISTORY_SHOW_VERSION_PDF');
 setup_print_on_off('OBJECTHISTORY_HIDE_VERSION_ON_TABS');
 setup_print_on_off('OBJECTHISTORY_ARCHIVE_PDF_TOO');
-setup_print_on_off('OBJECTHISTORY_ARCHIVE_ON_MODIFY');
 setup_print_on_off('OBJECTHISTORY_USE_COMPRESS_ARCHIVE');
 
 // Example with imput
@@ -132,6 +133,26 @@ setup_print_on_off('OBJECTHISTORY_USE_COMPRESS_ARCHIVE');
 
 print '</table>';
 
-llxFooter();
+dol_fiche_end();
+
+?>
+<script type="text/javascript">
+	$(function() {
+		$('#set_OBJECTHISTORY_AUTO_ARCHIVE').click(function(event) {
+			if ($('#del_OBJECTHISTORY_ARCHIVE_ON_MODIFY').css('display') !== 'none') {
+				$('#del_OBJECTHISTORY_ARCHIVE_ON_MODIFY').click();
+			}
+		});
+
+		$('#set_OBJECTHISTORY_ARCHIVE_ON_MODIFY').click(function(event) {
+			if ($('#del_OBJECTHISTORY_AUTO_ARCHIVE').css('display') !== 'none') {
+				$('#del_OBJECTHISTORY_AUTO_ARCHIVE').click();
+			}
+		});
+	});
+</script>
+<?php
+
+llxFooter($notab);
 
 $db->close();

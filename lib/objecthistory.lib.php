@@ -25,7 +25,7 @@
 
 function objecthistoryAdminPrepareHead()
 {
-    global $langs, $conf;
+    global $db,$langs,$conf;
 
     $langs->load("objecthistory@objecthistory");
 
@@ -40,10 +40,15 @@ function objecthistoryAdminPrepareHead()
 	$res = dol_include_once('/propalehistory/config.php');
 	if ($res)
 	{
-		$head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_migrate_propalehistory.php", 1);
-		$head[$h][1] = $langs->trans("Module104090Name");
-		$head[$h][2] = 'propalehistory';
-		$h++;
+		$sql = 'DESC '.MAIN_DB_PREFIX.'propale_history';
+		$resql = $db->query($sql);
+		if ($resql && ($row = $db->fetch_row($resql)))
+		{
+			$head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_migrate_propalehistory.php", 1);
+			$head[$h][1] = $langs->trans("Module104090Name");
+			$head[$h][2] = 'propalehistory';
+			$h++;
+		}
 	}
 
     $head[$h][0] = dol_buildpath("/objecthistory/admin/objecthistory_about.php", 1);
