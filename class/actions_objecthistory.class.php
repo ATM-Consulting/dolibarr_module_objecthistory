@@ -101,8 +101,6 @@ class ActionsObjectHistory
 			if (! empty($conf->global->OBJECTHISTORY_ARCHIVE_ON_MODIFY))
 			{
 				// CommandeFournisseur = reopen
-
-//				if (in_array($action, array('modif', 'reopen')))
 				if ($action == 'modif' || $object->element == 'order_supplier' && $object->statut == 2 && $action == 'reopen')
 				{
 					$action = 'objecthistory_modif';
@@ -126,7 +124,7 @@ class ActionsObjectHistory
 					// CommandeFournisseur = reopen
 					// On provoque le repassage-en brouillon avec l'action de base
 					if ($object->element == 'order_supplier') $action = 'reopen';
-					elseif ($object->element == 'invoice_supplier') $action = 'edit';
+					elseif ($object->element == 'commande') $action = 'confirm_modif'; // spé ici, les commandes clients affiche de base une popin de confirmation pour rouverture
 					else $action = 'modif';
 
 					return 0; // Do standard code
@@ -154,15 +152,15 @@ class ActionsObjectHistory
 				$version->fetch(GETPOST('idVersion'));
 				$version->unserializeObject();
 
-				if (!empty($object->fields))
-				{
-					foreach ($object->fields as $key => &$val)
-					{
-						$val = $version->serialized_object_source->{$key};
-					}
-				}
-				else
-				{
+//				if (!empty($object->fields))
+//				{
+//					foreach ($object->fields as $key => &$val)
+//					{
+//						$val = $version->serialized_object_source->{$key};
+//					}
+//				}
+//				else
+//				{
 					foreach($version->serialized_object_source as $k => $v)
 					{
 						if ($k == 'db') continue;
@@ -175,7 +173,7 @@ class ActionsObjectHistory
 						$line->db = $this->db;
 						//$line->fetch_optionals();
 					}
-				}
+//				}
 
 				return 1;
 
@@ -220,8 +218,6 @@ class ActionsObjectHistory
 
 	function formConfirm($parameters, &$object, &$action, $hookmanager)
 	{
-		global $langs;
-
 		if ($action == 'objecthistory_modif')
 		{
 			$form = new Form($this->db);
@@ -231,11 +227,13 @@ class ActionsObjectHistory
 
 			return 1;
 		}
+
+		return 0;
 	}
 
 	function addMoreActionsButtons($parameters, &$object, &$action, $hookmanager)
 	{
-		global $conf,$langs;
+		global $conf;
 
 		$TContext = explode(':',$parameters['context']);
 

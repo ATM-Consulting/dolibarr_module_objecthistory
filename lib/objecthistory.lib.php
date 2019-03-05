@@ -112,9 +112,20 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
         $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'], $langs->trans('MigrateObjectHistory'), $text, 'confirm_migrate', '', 0, 1);
     }
 	// commande fourn = reopen
-	// facture fourn = edit
-    else if ($action == 'objecthistory_modif')
+	else if ($action == 'objecthistory_modif')
 	{
+		// Cas à part pour les commandes clients où un formconfirm s'affiche pour la ré-ouverture
+		if ($object->element == 'commande')
+		{
+			$title = $langs->trans('UnvalidateOrder');
+			$text = $langs->trans('ConfirmUnvalidateOrder',$object->ref);
+		}
+		else
+		{
+			$title = $langs->trans('ObjectHistoryModify');
+			$text = $langs->trans('ConfirmModifyObject', $object->ref);
+		}
+
 		$formquestion = array(
 			array(
 				'type' => 'checkbox'
@@ -123,7 +134,7 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
 				,'value' => 1
 			)
 		);
-		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ObjectHistoryModify'), $langs->trans('ConfirmModifyObject', $object->ref), 'objecthistory_confirm_modify', $formquestion, 'yes', 1);
+		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $title, $text, 'objecthistory_confirm_modify', $formquestion, 'yes', 1);
 	}
 //    elseif ($action == 'delete' && !empty($user->rights->objecthistory->write))
 //    {
