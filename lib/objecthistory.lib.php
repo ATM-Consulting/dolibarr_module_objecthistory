@@ -136,16 +136,42 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
 		);
 		$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $title, $text, 'objecthistory_confirm_modify', $formquestion, 'yes', 1);
 	}
-//    elseif ($action == 'delete' && !empty($user->rights->objecthistory->write))
-//    {
-//        $text = $langs->trans('ConfirmDeleteObjectHistory');
-//        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('DeleteObjectHistory'), $text, 'confirm_delete', '', 0, 1);
-//    }
-//    elseif ($action == 'clone' && !empty($user->rights->objecthistory->write))
-//    {
-//        $text = $langs->trans('ConfirmCloneObjectHistory', $object->ref);
-//        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('CloneObjectHistory'), $text, 'confirm_clone', '', 0, 1);
-//    }
+    elseif ($action == 'view_archive')
+    {
+    	global $conf;
+
+		$values = array();
+		$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
+
+		$i=1;
+		foreach($TVersion as &$objecthistory)
+		{
+			$values[$objecthistory->id] = 'Version n° '.$i.' - '.price($objecthistory->total).' '.$langs->getCurrencySymbol($conf->currency,0).' - '.dol_print_date($objecthistory->date_creation, "dayhour");
+			$i++;
+		}
+
+		$formquestion = array(
+			array(
+				'type' => 'select'
+				,'name' => 'idVersion'
+				,'label' => $langs->trans("ObjectHistorySelectVersion")
+				,'values' => $values
+			)
+		);
+		$formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('ObjectHistoryViewArchive'), '', 'confirm_view_archive', $formquestion, 0, 1);
+    }
+    elseif ($action == 'delete_archive')
+    {
+		$formquestion = array(
+			array(
+				'type' => 'hidden'
+				,'name' => 'idVersion'
+				,'value' => GETPOST('idVersion', 'int')
+			)
+		);
+        $text = $langs->trans('ObjectHistoryConfirmDelete', $object->ref);
+        $formconfirm = $form->formconfirm($_SERVER['PHP_SELF'] . '?id=' . $object->id, $langs->trans('ObjectHistoryDeleteArchive'), $text, 'confirm_delete_archive', $formquestion, 0, 1);
+    }
 
     return $formconfirm;
 }
@@ -155,50 +181,28 @@ function getFormConfirmObjectHistory(&$form, &$object, $action)
  * @param ObjectHistory[] $TVersion
  * @return string
  */
-function getHtmlListObjectHistory($object, $TVersion, $actionATM)
+function getHtmlListObjectHistory($object, $TVersion, $action)
 {
-	global $db,$conf,$langs;
+	global $langs;
 
 	$html = '';
 
 	if (!empty($TVersion))
 	{
-		if($actionATM == 'viewVersion') $html.= '<div class="linkback" style="margin:15px"><a id="returnCurrent" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">'.$langs->trans('ReturnInitialVersion').'</a></div>';
+		if ($action == 'confirm_view_archive' || $action == 'delete_archive') $html.= '<div class="linkback" style="margin:15px"><a id="returnCurrent" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">'.$langs->trans('ReturnInitialVersion').'</a></div>';
 
-		$html.= '<div class="inline-block divButAction">';
-		$html.= '<form name="formVoirPropale" method="POST" action="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'">';
-		$html.= '<input type="hidden" name="actionATM" value="viewVersion" />';
-		$html.= '<input type="hidden" name="socid" value="'.(!empty($object->fk_soc) ? $object->fk_soc : $object->socid).'" />';
-		$html.= '<select name="idVersion" class="flat">';
-
-		$i = 1;
 		$idVersion = GETPOST('idVersion', 'int');
-		foreach($TVersion as &$objecthistory)
+
+		$html.= '<div class="inline-block divButAction"><a id="butViewArchive" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=view_archive">'.$langs->trans('ObjectHistoryViewArchive').'</a></div>';
+
+		if ($action == 'confirm_view_archive' || $action == 'delete_archive')
 		{
-			if($idVersion == $objecthistory->id) $selected = 'selected="selected"';
-			else $selected = "";
-
-			$html.= '<option id="'.$objecthistory->id.'" value="'.$objecthistory->id.'" '.$selected.'>Version n° '.$i.' - '.price($objecthistory->total).' '.$langs->getCurrencySymbol($conf->currency,0).' - '.dol_print_date($objecthistory->date_creation, "dayhour").'</option>';
-
-			$i++;
-		}
-
-		$html.= '</select>';
-		$html.= '<input class="butAction" id="voir" value="'.$langs->trans('Visualiser').'" type="SUBMIT" />';
-		$html.= '</form>';
-		$html.= '</div>';
-
-		$html.= ' | ';
-
-
-		if($actionATM == 'viewVersion')
-		{
-			$html.= '<div class="inline-block divButAction"><a id="butRestaurer" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&actionATM=restaurer&idVersion='.GETPOST('idVersion').'">'.$langs->trans('Restaurer').'</a></div>';
-			$html.= '<div class="inline-block divButAction"><a id="butSupprimer" class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&actionATM=supprimer&idVersion='.GETPOST('idVersion').'">'.$langs->trans('Delete').'</a></div>';
+			$html.= '<div class="inline-block divButAction"><a id="butRestaurer" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=restore_archive&idVersion='.$idVersion.'">'.$langs->trans('ObjectHistoryRestoreArchive').'</a></div>';
+			$html.= '<div class="inline-block divButAction"><a id="butSupprimer" class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete_archive&idVersion='.$idVersion.'">'.$langs->trans('ObjectHistoryDeleteArchive').'</a></div>';
 		}
 	}
 
-	if($actionATM == '' && ($object->element != 'order_supplier' && $object->statut == 1 || $object->element == 'order_supplier' && $object->statut == 2)) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&actionATM=createVersion">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
+	if ($action != 'confirm_view_archive' && $action != 'delete_archive' && ($object->element != 'order_supplier' && $object->statut == 1 || $object->element == 'order_supplier' && $object->statut == 2)) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=create_archive">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
 
 	return $html;
 }

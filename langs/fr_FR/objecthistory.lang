@@ -48,3 +48,11 @@ ObjectHistoryVersionSuccessfullRestored=Version restaurée avec succès
 ObjectHistoryModify=Rouvrir
 ArchiveObjectCheckboxLabel=Voulez-vous archiver l'objet avant sa réouverture ?
 ConfirmModifyObject=Veuillez confirmer votre réponse
+
+
+ObjectHistoryViewArchive=Visualiser une archive
+ObjectHistorySelectVersion=Choix :
+
+ObjectHistoryRestoreArchive=Restaurer
+ObjectHistoryDeleteArchive=Supprimer cette archive
+ObjectHistoryConfirmDelete=Êtes-vous sûr de vouloir effacer cette version ?

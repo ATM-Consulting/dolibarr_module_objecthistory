@@ -131,8 +131,8 @@ class ActionsObjectHistory
 				}
 			}
 
-			$actionATM = GETPOST('actionATM');
-			if($actionATM == 'viewVersion')
+			// l'action "delete_archive" affiche une popin de confirmation, donc il faut garder l'arrière plan dans la version précédemment sélectionnée
+			if($action == 'confirm_view_archive' || $action == 'delete_archive')
 			{
 				$id = $object->id;
 
@@ -178,7 +178,7 @@ class ActionsObjectHistory
 				return 1;
 
 			}
-			elseif($actionATM == 'createVersion')
+			elseif($action == 'create_archive')
 			{
 				$res = ObjectHistory::archiveObject($object);
 
@@ -188,7 +188,7 @@ class ActionsObjectHistory
 				header('Location: '.$_SERVER['PHP_SELF'].'?id='.$object->id);
 				exit;
 			}
-			elseif($actionATM == 'restaurer')
+			elseif($action == 'restore_archive')
 			{
 				$res = ObjectHistory::restoreObject($object, GETPOST('idVersion'));
 
@@ -198,7 +198,7 @@ class ActionsObjectHistory
 				header('Location: '.$_SERVER['PHP_SELF'].'?id='.$object->id);
 				exit;
 			}
-			elseif($actionATM == 'supprimer')
+			elseif($action == 'confirm_delete_archive')
 			{
 				$version = new ObjectHistory($this->db);
 				$version->fetch(GETPOST('idVersion'));
@@ -218,7 +218,7 @@ class ActionsObjectHistory
 
 	function formConfirm($parameters, &$object, &$action, $hookmanager)
 	{
-		if ($action == 'objecthistory_modif')
+		if ($action == 'objecthistory_modif' || $action == 'view_archive' || $action == 'delete_archive')
 		{
 			$form = new Form($this->db);
 			$formConfirm = getFormConfirmObjectHistory($form, $object, $action);
@@ -240,10 +240,8 @@ class ActionsObjectHistory
 		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
 		if (!empty($interSect))
 		{
-			$actionATM = GETPOST('actionATM');
-
 			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
-			print getHtmlListObjectHistory($object, $TVersion, $actionATM);
+			print getHtmlListObjectHistory($object, $TVersion, $action);
 
 			if(empty($conf->global->OBJECTHISTORY_HIDE_VERSION_ON_TABS))
 			{
@@ -259,7 +257,7 @@ class ActionsObjectHistory
 				}
 			}
 
-			if ($actionATM == 'viewVersion') return 1;
+			if ($action == 'confirm_view_archive' || $action == 'delete_archive') return 1;
 		}
 
 		return 0;
