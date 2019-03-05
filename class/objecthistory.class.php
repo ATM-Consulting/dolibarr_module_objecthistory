@@ -29,6 +29,8 @@ class ObjectHistory extends SeedObject
 	/** @var Propal|Commande|SupplierProposal|CommandeFournisseur|string $serialized_object_source */
 	public $serialized_object_source;
 
+	private static $THookAllowed=array();
+
 	public function __construct($db)
 	{
 		global $conf;
@@ -47,6 +49,18 @@ class ObjectHistory extends SeedObject
 		$this->init();
 
 		$this->entity = $conf->entity;
+	}
+
+	public static function getTHookAllowed()
+	{
+		if (empty(self::$THookAllowed))
+		{
+			global $conf;
+
+			self::$THookAllowed = explode(',', $conf->global->OBJECTHISTORY_HOOKS_ALLOWED);
+		}
+
+		return self::$THookAllowed;
 	}
 
 	public function unserializeObject()
@@ -184,12 +198,12 @@ class ObjectHistory extends SeedObject
 	 */
 	public static function restoreObject(&$object, $fk_version)
 	{
-		global $db,$conf,$user,$langs;
+		global $db,$conf,$user;
 
 		$version = new ObjectHistory($db);
 		$version->fetch($fk_version);
 		$version->unserializeObject();
-//var_dump(count($version->serialized_object_source->lines), $version->serialized_object_source->total_ht);exit;
+
 		$object->statut = 0;
 		foreach($object->lines as $line)
 		{
@@ -243,6 +257,9 @@ class ObjectHistory extends SeedObject
 
 		$object->fetch($object->id); //reload for generatePDF
 		self::generatePDF($object);
+
+		// TODO handle error
+		return 1;
 	}
 }
 
@@ -268,17 +285,6 @@ class CommandeHistory extends Commande
 
 }
 
-require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
-class FactureHistory extends Facture
-{
-	/** @override */
-	function getLinesArray()
-	{
-		return null;
-	}
-
-}
-
 require_once DOL_DOCUMENT_ROOT.'/supplier_proposal/class/supplier_proposal.class.php';
 class SupplierProposalHistory extends SupplierProposal
 {
@@ -294,22 +300,30 @@ class SupplierProposalHistory extends SupplierProposal
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
 class CommandeFournisseurHistory extends CommandeFournisseur
 {
-//	/** @override */
-//	function getLinesArray()
-//	{
-//		return null;
-//	}
+	/** @override */
+	function fetch($id, $ref = '')
+	{
+		// Si l'objet n'a jamais été fetch || Si getLinesArray existe, alors elle est potentiellement utilisé dans la card et en théorie rien d'autre à faire
+		if (empty($this->id) || method_exists(get_parent_class($this), 'getLinesArray'))
+		{
+			return parent::fetch($id, $ref);
+		}
+		else
+		{
+			// Trick for this object
+			$old_lines = $this->lines;
+			$res = parent::fetch($id, $ref);
+			$this->lines = $old_lines;
 
-}
+			return $res;
+		}
+	}
 
-// TODO check le fonctionnement => getLinesArray() NOT FOUND
-require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
-class FactureFournisseurHistory extends FactureFournisseur
-{
-//	/** @override */
-//	function getLinesArray()
-//	{
-//		return null;
-//	}
+
+	/** @override */
+	function getLinesArray()
+	{
+		return null;
+	}
 
 }
