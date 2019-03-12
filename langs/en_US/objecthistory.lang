@@ -1,7 +1,54 @@
-Module104089Name = ObjectHistory
-Module104089Desc = ObjectHistory Description
+Module104089Name = Documents history
+Module104089Desc = Allow to archive Dolibarr documents (proposals et orders) by giving them version numbers, allow to restore old versions and to keep each version in PDF
 
 ATMAbout = This module has been developed by <a href="http://www.atm-consulting.fr" target="_blank">ATM Consulting</a><br>You can find the documentation on our <a href="http://wiki.atm-consulting.fr/index.php/Accueil" target="_blank">wiki</a><br><br>For any question or feedback, contact us on <a href="mailto:support@atm-consulting.fr">support@atm-consulting.fr</a><br><br>For any commercial question, contact us on <a href="mailto:contact@atm-consulting.fr">contact@atm-consulting.fr</a> or at +33 9 77 19 50 70<br><br>Find our other modules on <a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=atm&submit_search=Rechercher" target="_blank">Dolistore</a>
 
-ObjectHistorySetup = ObjectHistory module setup
-ObjectHistoryAbout = About ObjectHistory
+ObjectHistorySetup = Documents history module setup
+ObjectHistoryAbout = About Documents history
+
+ObjectHistory=Documents history
+AbricotNeedUpdate=The abricot module must be updated
+
+# SETUP
+OBJECTHISTORY_HOOKS_ALLOWED=Document types concerned
+OBJECTHISTORY_AUTO_ARCHIVE=Automatically archive when validating the document
+OBJECTHISTORY_SHOW_VERSION_PDF=Display version number on the PDF (starting at 2)
+OBJECTHISTORY_HIDE_VERSION_ON_TABS=Hide version number in the document card
+OBJECTHISTORY_ARCHIVE_PDF_TOO=Also archive the PDF file
+OBJECTHISTORY_ARCHIVE_ON_MODIFY=Ask for archiving before the document goes back to draft
+OBJECTHISTORY_USE_COMPRESS_ARCHIVE=Compress data in database
+
+objecthistory_propalcard=Commercial proposal
+objecthistory_ordercard=Customer order
+objecthistory_supplier_proposalcard=Supplier commercial proposal
+objecthistory_ordersuppliercard=Supplier order
+
+objecthistory_nb_line=# of lines detected in the "Proposal history" module table : %d
+objecthistory_action_migrate=Migrate data from "Proposal history" into "Documents history"
+
+MigrateObjectHistory=Migration
+ConfirmMigrateObjectHistory=Warning : migration can last very long depending on the amount of data. Are you sure you want to migrate ?
+
+objecthistory_errorDuringMigration=Error during migration process (%s)
+objecthistory_migrationSuccess=Migration completed successfully
+
+ReturnInitialVersion=Back to current version
+ObjectHistoryArchiver=Archive
+Visualiser=Display archives
+Restaurer=Restore
+
+ObjectHistoryVersionSuccessfullDelete=Version deleted successfully
+ObjectHistoryVersionSuccessfullArchived=Version archived successfully
+ObjectHistoryVersionSuccessfullRestored=Version restored successfully
+
+ObjectHistoryModify=Reopen
+ArchiveObjectCheckboxLabel=Do you want to archive the document before reopening ?
+ConfirmModifyObject=Please confirm
+
+
+ObjectHistoryViewArchive=Display an archive
+ObjectHistorySelectVersion=Choice :
+
+ObjectHistoryRestoreArchive=Restore
+ObjectHistoryDeleteArchive=Delete this archive
+ObjectHistoryConfirmDelete=Are you sure you want to delete this version ?
