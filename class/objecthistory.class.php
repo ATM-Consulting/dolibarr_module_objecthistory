@@ -34,9 +34,9 @@ class ObjectHistory extends SeedObject
 	public function __construct($db)
 	{
 		global $conf;
-		
+
 		$this->db = $db;
-		
+
 		$this->fields=array(
 				'fk_source'=>array('type'=>'integer','index'=>true)
 				,'element_source'=>array('type'=>'string')
@@ -45,7 +45,7 @@ class ObjectHistory extends SeedObject
 				,'entity'=>array('type'=>'integer','index'=>true)
 				,'serialized_object_source'=>array('type'=>'text')
 		);
-		
+
 		$this->init();
 
 		$this->entity = $conf->entity;
@@ -236,7 +236,7 @@ class ObjectHistory extends SeedObject
 
 
 		if ($object->element == 'order_supplier') $object->setStatus($user, 0);
-		else $object->set_draft($user);
+		else $object->setDraft($user);
 
 
 		if (method_exists($object, 'set_availability')) $object->set_availability($user, $version->serialized_object_source->availability_id);
