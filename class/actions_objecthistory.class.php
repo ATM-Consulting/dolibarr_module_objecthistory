@@ -255,6 +255,12 @@ class ActionsObjectHistory
 //							console.log($("#id-right div.tabsElem a:first"));
 						</script>';
 				}
+				else if(! empty($TVersion)) {
+					$num = count($TVersion) + 1; // TODO voir pour afficher le bon numéro de version si on est en mode visu
+					print '<script type="text/javascript">
+							$("#id-right div.tabsElem a:first").append(" / v.'.$num.'");
+						</script>';
+				}
 			}
 
 			if ($action == 'confirm_view_archive' || $action == 'delete_archive') return 1;
