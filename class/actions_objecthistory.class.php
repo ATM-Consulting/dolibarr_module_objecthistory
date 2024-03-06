@@ -98,7 +98,7 @@ class ActionsObjectHistory
 		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
 		if (!empty($interSect))
 		{
-			if (! empty($conf->global->OBJECTHISTORY_ARCHIVE_ON_MODIFY))
+			if (getDolGlobalString('OBJECTHISTORY_ARCHIVE_ON_MODIFY'))
 			{
 				// CommandeFournisseur = reopen
 				if ($action == 'modif' || $object->element == 'order_supplier' && $object->statut == 2 && $action == 'reopen')
@@ -243,7 +243,7 @@ class ActionsObjectHistory
 			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
 			print getHtmlListObjectHistory($object, $TVersion, $action);
 
-			if(empty($conf->global->OBJECTHISTORY_HIDE_VERSION_ON_TABS))
+			if(!getDolGlobalString('OBJECTHISTORY_HIDE_VERSION_ON_TABS'))
 			{
 				$idVersion = GETPOST('idVersion', 'int');
 
@@ -273,7 +273,7 @@ class ActionsObjectHistory
 	{
 		global $conf;
 
-		if (!empty($conf->global->OBJECTHISTORY_SHOW_VERSION_PDF))
+		if (getDolGlobalString('OBJECTHISTORY_SHOW_VERSION_PDF'))
 		{
 			$TContext = explode(':',$parameters['context']);
 
@@ -297,7 +297,7 @@ class ActionsObjectHistory
 	{
 		global $conf;
 
-		if (!empty($conf->global->OBJECTHISTORY_SHOW_VERSION_PDF) && !empty($this->old_object_ref))
+		if (getDolGlobalString('OBJECTHISTORY_SHOW_VERSION_PDF')&& !empty($this->old_object_ref))
 		{
 			$object_src = $parameters['object'];
 			if (!empty($object_src)) $object_src->ref = $this->old_object_ref;

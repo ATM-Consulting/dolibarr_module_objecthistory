@@ -25,7 +25,7 @@
 
 function objecthistoryAdminPrepareHead()
 {
-    global $db,$langs,$conf;
+    global $db,$langs,$conf, $object;
 
     $langs->load("objecthistory@objecthistory");
 
@@ -37,9 +37,10 @@ function objecthistoryAdminPrepareHead()
 	$head[$h][2] = 'settings';
 	$h++;
 
-	$res = dol_include_once('/propalehistory/config.php');
+	$res = dol_include_once('/propalehistory/core/modules/modPropalehistory.class.php');
 	if ($res)
 	{
+        $langs->load('propalehistory@propalehistory');
 		$sql = 'DESC '.MAIN_DB_PREFIX.'propale_history';
 		$resql = $db->query($sql);
 		if ($resql && ($row = $db->fetch_row($resql)))

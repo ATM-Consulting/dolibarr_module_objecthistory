@@ -136,7 +136,7 @@ class InterfaceObjectHistorytrigger
         // Data and type of action are stored into $object and $action
         // Users
 
-		if (!empty($conf->global->OBJECTHISTORY_AUTO_ARCHIVE) && in_array($action, array('PROPAL_VALIDATE', 'ORDER_VALIDATE', 'SUPPLIER_PROPOSAL_VALIDATE', 'ORDER_SUPPLIER_VALIDATE')))
+		if (getDolGlobalString('OBJECTHISTORY_AUTO_ARCHIVE') && in_array($action, array('PROPAL_VALIDATE', 'ORDER_VALIDATE', 'SUPPLIER_PROPOSAL_VALIDATE', 'ORDER_SUPPLIER_VALIDATE')))
 		{
 			if (!defined('INC_FROM_DOLIBARR')) define('INC_FROM_DOLIBARR', true);
 			dol_include_once('/objecthistory/config.php');
