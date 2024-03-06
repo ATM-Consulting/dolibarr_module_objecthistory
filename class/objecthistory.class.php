@@ -34,9 +34,9 @@ class ObjectHistory extends SeedObject
 	public function __construct($db)
 	{
 		global $conf;
-		
+
 		$this->db = $db;
-		
+
 		$this->fields=array(
 				'fk_source'=>array('type'=>'integer','index'=>true)
 				,'element_source'=>array('type'=>'string')
@@ -45,7 +45,7 @@ class ObjectHistory extends SeedObject
 				,'entity'=>array('type'=>'integer','index'=>true)
 				,'serialized_object_source'=>array('type'=>'text')
 		);
-		
+
 		$this->init();
 
 		$this->entity = $conf->entity;
@@ -57,7 +57,7 @@ class ObjectHistory extends SeedObject
 		{
 			global $conf;
 
-			self::$THookAllowed = explode(',', $conf->global->OBJECTHISTORY_HOOKS_ALLOWED);
+			self::$THookAllowed = explode(',', getDolGlobalString('OBJECTHISTORY_HOOKS_ALLOWED'));
 		}
 
 		return self::$THookAllowed;
@@ -79,7 +79,7 @@ class ObjectHistory extends SeedObject
 		global $conf;
 
 		$code = serialize($object);
-		if(!empty($conf->global->OBJECTHISTORY_USE_COMPRESS_ARCHIVE)) $code = base64_encode( gzdeflate($code) );
+		if(getDolGlobalString('OBJECTHISTORY_USE_COMPRESS_ARCHIVE')) $code = base64_encode( gzdeflate($code) );
 
 		$this->serialized_object_source = $code;
 	}
@@ -118,7 +118,7 @@ class ObjectHistory extends SeedObject
 	{
 		global $db,$conf,$user;
 
-		if (!empty($conf->global->OBJECTHISTORY_ARCHIVE_PDF_TOO)) self::archivePDF($object);
+		if (getDolGlobalString('OBJECTHISTORY_ARCHIVE_PDF_TOO')) self::archivePDF($object);
 
 		$newVersion = new ObjectHistory($db);
 		$newVersion->serializeObject($object);
@@ -181,10 +181,11 @@ class ObjectHistory extends SeedObject
 			if (empty($moreparams)) $moreparams=null;
 
 			// $object->modelpdf ?
-			if ($object->element == 'propal') $res = $object->generateDocument($conf->global->PROPALE_ADDON_PDF, $langs,$hidedetails, $hidedesc, $hideref, $moreparams);
-			elseif ($object->element == 'commande') $res = $object->generateDocument($conf->global->COMMANDE_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
-			elseif ($object->element == 'supplier_proposal') $res = $object->generateDocument($conf->global->SUPPLIER_PROPOSAL_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
-			elseif ($object->element == 'supplier_order') $res = $object->generateDocument($conf->global->COMMANDE_SUPPLIER_ADDON_PDF, $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
+            $res = true;
+			if ($object->element == 'propal') $res = $object->generateDocument(getDolGlobalString('PROPALE_ADDON_PDF'), $langs,$hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'commande') $res = $object->generateDocument(getDolGlobalString('COMMANDE_ADDON_PDF'), $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'supplier_proposal') $res = $object->generateDocument(getDolGlobalString('SUPPLIER_PROPOSAL_ADDON_PDF'), $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
+			elseif ($object->element == 'supplier_order') $res = $object->generateDocument(getDolGlobalString('COMMANDE_SUPPLIER_ADDON_PDF'), $langs, $hidedetails, $hidedesc, $hideref, $moreparams);
 
 			return $res;
 		}
@@ -213,12 +214,12 @@ class ObjectHistory extends SeedObject
 
 		if ($object->element == 'supplier_proposal')
 		{
-			$old_val = $conf->global->SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY;
+			$old_val = getDolGlobalString('SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY');
 			$conf->global->SUPPLIER_PROPOSAL_WITH_PREDEFINED_PRICES_ONLY = 0;
 		}
 		elseif ($object->element == 'order_supplier')
 		{
-			$old_val = $conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY;
+			$old_val = getDolGlobalString('SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY');
 			$conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY = 0;
 		}
 
@@ -236,12 +237,12 @@ class ObjectHistory extends SeedObject
 
 
 		if ($object->element == 'order_supplier') $object->setStatus($user, 0);
-		else $object->set_draft($user);
+		else $object->setDraft($user);
 
 
 		if (method_exists($object, 'set_availability')) $object->set_availability($user, $version->serialized_object_source->availability_id);
 		if (method_exists($object, 'set_date')) $object->set_date($user, $version->serialized_object_source->date);
-		if (method_exists($object, 'set_date_livraison')) $object->set_date_livraison($user, $version->serialized_object_source->date_livraison);
+		if (method_exists($object, 'set_date_livraison')) $object->setDeliveryDate($user, $version->serialized_object_source->delivery_date);
 
 		if (method_exists($object, 'set_echeance')) $object->set_echeance($user, $version->serialized_object_source->fin_validite);
 		if (method_exists($object, 'set_ref_client')) $object->set_ref_client($user, $version->serialized_object_source->ref_client);
@@ -267,7 +268,7 @@ require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 class PropalHistory extends Propal
 {
 	/** @override */
-	function getLinesArray()
+	function getLinesArray($sqlforgedfilters = '')
 	{
 		return null;
 	}
