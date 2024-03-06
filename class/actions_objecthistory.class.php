@@ -238,7 +238,7 @@ class ActionsObjectHistory
 		$TContext = explode(':',$parameters['context']);
 
 		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
-		if (!empty($interSect))
+		if (!empty($interSect) && !empty($object->id))
 		{
 			$TVersion = ObjectHistory::getAllVersionBySourceId($object->id, $object->element);
 			print getHtmlListObjectHistory($object, $TVersion, $action);
