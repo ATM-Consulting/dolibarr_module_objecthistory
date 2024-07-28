@@ -154,7 +154,7 @@ if ($nb_line > $nb_line_already_backuped)
 	print '
 		<div class="tabsAction">
 			<div class="inline-block divButAction">
-				<a class="butAction" href="'.dol_buildpath('/objecthistory/admin/objecthistory_migrate_propalehistory.php', 1).'?action=objecthistory_migrate">'.$langs->trans('objecthistory_action_migrate').'</a>
+				<a class="butAction" href="'.dol_buildpath('/objecthistory/admin/objecthistory_migrate_propalehistory.php', 1).'?action=objecthistory_migrate&token='.newToken().'">'.$langs->trans('objecthistory_action_migrate').'</a>
 			</div>
 		</div>';
 }
