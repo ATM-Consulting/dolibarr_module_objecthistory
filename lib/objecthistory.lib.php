@@ -194,16 +194,16 @@ function getHtmlListObjectHistory($object, $TVersion, $action)
 
 		$idVersion = GETPOST('idVersion', 'int');
 
-		$html.= '<div class="inline-block divButAction"><a id="butViewArchive" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=view_archive">'.$langs->trans('ObjectHistoryViewArchive').'</a></div>';
+		$html.= '<div class="inline-block divButAction"><a id="butViewArchive" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=view_archive&token='.newToken().'">'.$langs->trans('ObjectHistoryViewArchive').'</a></div>';
 
 		if ($action == 'confirm_view_archive' || $action == 'delete_archive')
 		{
-			$html.= '<div class="inline-block divButAction"><a id="butRestaurer" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=restore_archive&idVersion='.$idVersion.'">'.$langs->trans('ObjectHistoryRestoreArchive').'</a></div>';
-			$html.= '<div class="inline-block divButAction"><a id="butSupprimer" class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete_archive&idVersion='.$idVersion.'">'.$langs->trans('ObjectHistoryDeleteArchive').'</a></div>';
+			$html.= '<div class="inline-block divButAction"><a id="butRestaurer" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=restore_archive&idVersion='.$idVersion.'&token='.newToken().'">'.$langs->trans('ObjectHistoryRestoreArchive').'</a></div>';
+			$html.= '<div class="inline-block divButAction"><a id="butSupprimer" class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=delete_archive&idVersion='.$idVersion.'&token='.newToken().'">'.$langs->trans('ObjectHistoryDeleteArchive').'</a></div>';
 		}
 	}
 
-	if ($action != 'confirm_view_archive' && $action != 'delete_archive' && ($object->element != 'order_supplier' && $object->statut == 1 || $object->element == 'order_supplier' && $object->statut == 2)) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=create_archive">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
+	if ($action != 'confirm_view_archive' && $action != 'delete_archive' && ($object->element != 'order_supplier' && $object->statut == 1 || $object->element == 'order_supplier' && $object->statut == 2)) $html.= '<div class="inline-block divButAction"><a id="butNewVersion" class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=create_archive&token='.newToken().'">'.$langs->trans('ObjectHistoryArchiver').'</a></div>';
 
 	return $html;
 }

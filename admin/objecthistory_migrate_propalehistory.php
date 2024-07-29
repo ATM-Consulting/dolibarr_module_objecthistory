@@ -34,7 +34,7 @@ require_once '../class/objecthistory.class.php';
 require_once '../lib/objecthistory.lib.php';
 
 // Translations
-$langs->load("objecthistory@objecthistory");
+$langs->loadLangs(array("admin", "objecthistory@objecthistory"));
 
 // Access control
 if (! $user->admin) {
@@ -54,7 +54,7 @@ if ($action == 'confirm_migrate' && !empty($user->admin))
 	$sql = 'SELECT ph.rowid, p.entity FROM '.MAIN_DB_PREFIX.'propale_history ph
 			INNER JOIN '.MAIN_DB_PREFIX.'propal p ON (p.rowid = ph.fk_propale)
 			WHERE NOT EXISTS (
-				SELECT o.rowid FROM '.MAIN_DB_PREFIX.'objecthistory o WHERE o.element_source = \'propal\' AND o.fk_source = ph.fk_propale 
+				SELECT o.rowid FROM '.MAIN_DB_PREFIX.'objecthistory o WHERE o.element_source = \'propal\' AND o.fk_source = ph.fk_propale
 			)
 			';
 
@@ -154,7 +154,7 @@ if ($nb_line > $nb_line_already_backuped)
 	print '
 		<div class="tabsAction">
 			<div class="inline-block divButAction">
-				<a class="butAction" href="'.dol_buildpath('/objecthistory/admin/objecthistory_migrate_propalehistory.php', 1).'?action=objecthistory_migrate">'.$langs->trans('objecthistory_action_migrate').'</a>
+				<a class="butAction" href="'.dol_buildpath('/objecthistory/admin/objecthistory_migrate_propalehistory.php', 1).'?action=objecthistory_migrate&token='.newToken().'">'.$langs->trans('objecthistory_action_migrate').'</a>
 			</div>
 		</div>';
 }

@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php";
 require_once '../lib/objecthistory.lib.php';
 
 // Translations
-$langs->load("objecthistory@objecthistory");
+$langs->loadLangs(array("admin", "objecthistory@objecthistory"));
 
 // Access control
 if (! $user->admin) {
