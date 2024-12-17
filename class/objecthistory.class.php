@@ -68,7 +68,18 @@ class ObjectHistory extends SeedObject
 		$code = @gzinflate(base64_decode($this->serialized_object_source));
 		if($code === false) $code = $this->serialized_object_source;
 
-		$code = unserialize($code);
+		$code = unserialize($code, ["allowed_classes" =>
+			[
+				"Propale",
+				"PropaleLigne",
+				"Commande",
+				"OrderLine",
+				"CommandeFournisseur",
+				"CommandeFournisseurLigne",
+				"SupplierProposal",
+				"SupplierProposalLine"
+			]
+		]);
 		if($code === false) $code = unserialize(utf8_decode($code));
 
 		$this->serialized_object_source = $code;
