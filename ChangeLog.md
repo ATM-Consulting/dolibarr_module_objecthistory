@@ -5,7 +5,7 @@
 
 
 ## Release 1.1
-
+- FIX : DA026122 restore lines propal- **21/02/2024** - 1.1.3
 - FIX : Compat V21 - **23/12/2024** - 1.1.2
 - FIX : DA025889 Fatal unserialize - *17/12/2024* - 1.1.1
 - FIX: Compat v20  
