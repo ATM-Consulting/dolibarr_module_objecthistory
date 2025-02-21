@@ -92,7 +92,6 @@ class ActionsObjectHistory
 	function doActions($parameters, &$object, &$action, $hookmanager)
 	{
 		global $conf,$langs,$user;
-
 		$TContext = explode(':',$parameters['context']);
 
 		$interSect = array_intersect($TContext, ObjectHistory::getTHookAllowed());
