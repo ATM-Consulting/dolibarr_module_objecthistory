@@ -70,7 +70,7 @@ class ObjectHistory extends SeedObject
 
 		$code = unserialize($code, ["allowed_classes" =>
 			[
-				"Propale",
+				"Propal",
 				"PropaleLigne",
 				"Commande",
 				"OrderLine",
