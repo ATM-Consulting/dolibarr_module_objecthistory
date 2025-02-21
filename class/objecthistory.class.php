@@ -217,7 +217,6 @@ class ObjectHistory extends SeedObject
 		$version->unserializeObject();
 
 		$object->statut = 0;
-
 		foreach($object->lines as $line)
 		{
 			if ($object->element == 'commande') $object->deleteline($user, $line->id);
@@ -234,6 +233,7 @@ class ObjectHistory extends SeedObject
 			$old_val = getDolGlobalString('SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY');
 			$conf->global->SUPPLIER_ORDER_WITH_PREDEFINED_PRICES_ONLY = 0;
 		}
+
 		foreach($version->serialized_object_source->lines as $line)
 		{
 			if ($object->element == 'propal') $object->addline($line->desc, $line->subprice, $line->qty, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_product, $line->remise_percent, 'HT', '', $line->info_bits, $line->product_type, $line->rang, $line->special_code, $line->fk_parent_line, $line->fk_fournprice, $line->pa_ht, $line->label, $line->date_start, $line->date_end, $line->array_options, $line->fk_unit, $line->fk_remise_except);
