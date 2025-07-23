@@ -221,7 +221,7 @@ class ObjectHistory extends SeedObject
 		foreach($object->lines as $line)
 		{
 			if ($object->element == 'commande') $object->deleteline($user, $line->id);
-			else {$object->deleteline($line->id);}
+			else $object->deleteline($line->id);
 		}
 
 		if ($object->element == 'supplier_proposal')
