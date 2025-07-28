@@ -217,6 +217,7 @@ class ObjectHistory extends SeedObject
 		$version->unserializeObject();
 
 		$object->statut = 0;
+		$object->setDraft($user);
 		foreach($object->lines as $line)
 		{
 			if ($object->element == 'commande') $object->deleteline($user, $line->id);
